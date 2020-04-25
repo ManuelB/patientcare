@@ -6665,7 +6665,7 @@ this.JMAP = {};
 
     mail.handle(MessageDetails, {
         fetch: function(accountId, ids) {
-            this.callMethod('Email/get', {
+            this.callMethod('getMessages' /* 'Email/get' */ , {
                 accountId: accountId,
                 ids: ids,
                 properties: Message.detailsProperties,
@@ -6677,7 +6677,7 @@ this.JMAP = {};
 
     mail.handle(MessageBodyValues, {
         fetch: function(accountId, ids) {
-            this.callMethod('Email/get', {
+            this.callMethod('getMessages' /* 'Email/get' */ , {
                 accountId: accountId,
                 ids: ids,
                 properties: ['bodyValues'],
@@ -6691,28 +6691,28 @@ this.JMAP = {};
 
     mail.handle(MessageThread, {
         fetch: function(accountId, ids) {
-            this.callMethod('Email/get', {
+            this.callMethod('getMessages' /* 'Email/get' */ , {
                 accountId: accountId,
                 ids: ids,
                 properties: ['threadId'],
             });
-            this.callMethod('Thread/get', {
-                accountId: accountId,
-                '#ids': {
-                    resultOf: this.getPreviousMethodId(),
-                    name: 'Email/get',
-                    path: '/list/*/threadId',
-                },
-            });
-            this.callMethod('Email/get', {
-                accountId: accountId,
-                '#ids': {
-                    resultOf: this.getPreviousMethodId(),
-                    name: 'Thread/get',
-                    path: '/list/*/emailIds',
-                },
-                properties: Message.headerProperties
-            });
+            // this.callMethod('Thread/get', {
+            //     accountId: accountId,
+            //     '#ids': {
+            //         resultOf: this.getPreviousMethodId(),
+            //         name: 'getMessages' /* 'Email/get' */,
+            //         path: '/list/*/threadId',
+            //     },
+            // });
+            // this.callMethod('getMessages' /* 'Email/get' */, {
+            //     accountId: accountId,
+            //     '#ids': {
+            //         resultOf: this.getPreviousMethodId(),
+            //         name: 'Thread/get',
+            //         path: '/list/*/emailIds',
+            //     },
+            //     properties: Message.headerProperties
+            // });
         },
     });
 
@@ -6727,8 +6727,8 @@ this.JMAP = {};
             // Called with ids == null if you try to refresh before we have any
             // data loaded. Just ignore.
             if (ids) {
-                this.callMethod('Email/get', {
-                    accountId: accountId,
+                this.callMethod('getMessages' /* 'Email/get' */ , {
+                    // accountId: accountId,
                     ids: ids,
                     properties: Message.headerProperties
                 });
@@ -6737,8 +6737,8 @@ this.JMAP = {};
 
         refresh: function(accountId, ids, state) {
             if (ids) {
-                this.callMethod('Email/get', {
-                    accountId: accountId,
+                this.callMethod('getMessages' /* 'Email/get' */ , {
+                    // accountId: accountId,
                     ids: ids,
                     properties: Message.mutableProperties,
                 });
@@ -6755,7 +6755,7 @@ this.JMAP = {};
 
         // ---
 
-        'Email/get': function(args, _, reqArgs) {
+        'getMessages' /* 'Email/get' */: function(args, _, reqArgs) {
             var store = this.get('store');
             var list = args.list;
             var accountId = args.accountId;
@@ -7138,7 +7138,7 @@ this.JMAP = {};
                     accountId: accountId,
                     ids: ids,
                 });
-                this.callMethod('Email/get', {
+                this.callMethod('getMessages' /* 'Email/get' */ , {
                     accountId: accountId,
                     '#ids': {
                         resultOf: this.getPreviousMethodId(),
@@ -7444,23 +7444,23 @@ this.JMAP = {};
             var isEmpty = (query.get('status') & EMPTY);
 
             var fetchThreads = function() {
-                this.callMethod('Thread/get', {
-                    accountId: accountId,
-                    '#ids': {
-                        resultOf: this.getPreviousMethodId(),
-                        name: 'Email/get',
-                        path: '/list/*/threadId',
-                    },
-                });
-                this.callMethod('Email/get', {
-                    accountId: accountId,
-                    '#ids': {
-                        resultOf: this.getPreviousMethodId(),
-                        name: 'Thread/get',
-                        path: '/list/*/emailIds',
-                    },
-                    properties: Message.headerProperties,
-                });
+                // this.callMethod('Thread/get', {
+                //    accountId: accountId,
+                //    '#ids': {
+                //        resultOf: this.getPreviousMethodId(),
+                //        name: 'Email/get',
+                //        path: '/list/*/threadId',
+                //    },
+                //});
+                //this.callMethod('Email/get', {
+                //    accountId: accountId,
+                //    '#ids': {
+                //        resultOf: this.getPreviousMethodId(),
+                //        name: 'Thread/get',
+                //        path: '/list/*/emailIds',
+                //    },
+                //    properties: Message.headerProperties,
+                //});
             }.bind(this);
 
             if (canGetDeltaUpdates && queryState && refresh) {
@@ -7501,33 +7501,35 @@ this.JMAP = {};
                 (!isEmpty && !query.get('hasTotal')) ||
                 (!canGetDeltaUpdates && !!refresh);
             var get = function(start, count, anchor, offset, fetchData) {
-                this.callMethod('Email/query', {
-                    accountId: accountId,
+                this.callMethod('getMessageList' /*'Email/query'*/ , {
+                    // accountId: accountId,
                     filter: where,
                     sort: sort,
                     collapseThreads: collapseThreads,
                     position: start,
-                    anchor: anchor,
-                    anchorOffset: offset,
+                    // anchor: anchor,
+                    // anchorOffset: offset,
                     limit: count,
-                    calculateTotal: calculateTotal,
+                    // calculateTotal: calculateTotal,
+                    fetchMessages: true,
+                    fetchMessageProperties: ["subject"]
                 });
                 hasMadeRequest = true;
                 calculateTotal = false;
-                if (fetchData) {
-                    this.callMethod('Email/get', {
-                        accountId: accountId,
-                        '#ids': {
-                            resultOf: this.getPreviousMethodId(),
-                            name: 'Email/query',
-                            path: '/ids',
-                        },
-                        properties: collapseThreads ? ['threadId'] : Message.headerProperties,
-                    });
-                    if (collapseThreads) {
-                        fetchThreads();
-                    }
-                }
+                //if (fetchData) {
+                //    this.callMethod('getMessages' /* 'Email/get' */ , {
+                //        // accountId: accountId,
+                //        '#ids': {
+                //            resultOf: this.getPreviousMethodId(),
+                //            name: 'getMessageList' /*'Email/query'*/ ,
+                //            path: '/ids',
+                //        },
+                //        properties: collapseThreads ? ['threadId'] : Message.headerProperties,
+                //    });
+                //    if (collapseThreads) {
+                //        fetchThreads();
+                //    }
+                //}
             }.bind(this);
 
             request.ids.forEach(function(req) {
@@ -7549,10 +7551,12 @@ this.JMAP = {};
 
         // ---
 
-        'Email/query': function(args, _, reqArgs) {
+        'messages' /*'Email/query'*/: function(args, _, reqArgs) {
             const query = this.get('store').getQuery(getId(reqArgs));
             var total, hasTotal, numIds;
             if (query) {
+                args.ids = args.list.map(oEntry => oEntry.id);
+                args.position = 0;
                 if (args.total === undefined) {
                     total = query.get('length');
                     hasTotal = query.get('hasTotal') && total !== null;
@@ -7983,8 +7987,8 @@ this.JMAP = {};
                     });
                     // We need to fetch the other server-set properties.
                     if (existing.length) {
-                        this.callMethod('Email/get', {
-                            accountId: accountId,
+                        this.callMethod('getMessages' /* 'Email/get' */ , {
+                            // accountId: accountId,
                             ids: existing,
                             properties: ['blobId', 'threadId', 'size'],
                         });
@@ -8687,7 +8691,7 @@ this.JMAP = {};
 
         findMessage: function(accountId, where) {
             return new Promise(function(resolve, reject) {
-                connection.callMethod('Email/query', {
+                connection.callMethod('getMessageList' /*'Email/query'*/ , {
                     accountId: accountId,
                     filter: where,
                     sort: null,
@@ -8695,7 +8699,7 @@ this.JMAP = {};
                     limit: 1,
                 }, function(responseArgs, responseName) {
                     var id;
-                    if (responseName === 'Email/query') {
+                    if (responseName === 'getMessageList' /*'Email/query'*/ ) {
                         id = responseArgs.ids[0];
                         if (id) {
                             resolve(store.getRecord(accountId, Message, id));
@@ -8707,11 +8711,11 @@ this.JMAP = {};
                     } else {
                         reject(responseArgs);
                     }
-                }).callMethod('Email/get', {
+                }).callMethod('getMessages' /* 'Email/get' */ , {
                     accountId: accountId,
                     '#ids': {
                         resultOf: connection.getPreviousMethodId(),
-                        name: 'Email/query',
+                        name: 'getMessageList' /*'Email/query'*/ ,
                         path: '/ids',
                     },
                     properties: Message.headerProperties,

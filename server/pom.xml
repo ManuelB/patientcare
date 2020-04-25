@@ -23,10 +23,5 @@
 			<artifactId>james-server-memory-guice</artifactId>
 			<version>3.5.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.james</groupId>
-			<artifactId>james-server-jmap-rfc-8621</artifactId>
-			<version>3.5.0</version>
-		</dependency>
 	</dependencies>
 </project>

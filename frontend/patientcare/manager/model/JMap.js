@@ -45,7 +45,7 @@ sap.ui.define(["./JMapTreeBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
             let that = this;
             try {
                 O.RunLoop.invoke(() => {
-                    var rootMailboxes = JMAP.store.getQuery('rootMailboxes', O.LocalQuery, {
+                    const rootMailboxes = JMAP.store.getQuery('rootMailboxes', O.LocalQuery, {
                         Type: JMAP.Mailbox,
                         filter: function(data) {
                             return !data.parentId;
@@ -53,10 +53,35 @@ sap.ui.define(["./JMapTreeBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                         sort: JMAP.Mailbox.bySortOrderRoleOrName
                     });
 
+                    const mailboxMessageList = function(mailboxId) {
+                        if (!mailboxId) {
+                            return null;
+                        }
+                        const args = {
+                            autoRefresh: O.Query.AUTO_REFRESH_IF_OBSERVED,
+                            // accountId: this.get('mailbox').get('accountId'),
+                            where: { inMailbox: mailboxId },
+                            sort: ['date'],
+                            collapseThreads: true
+                        };
+                        const id = JMAP.MessageList.getId(args);
+                        const query = JMAP.store.getQuery(id, JMAP.MessageList, args);
+
+                        query.addObserverForKey('[]', {
+                            go: function(EMails, key) {
+                                const aEmailData = EMails.get("[]").map(oEmail => { return { "subject": oEmail.get("subject") }; })
+                                that.setProperty("/Mails", aEmailData);
+                            }
+                        }, 'go');
+
+                        JMAP.store.on(JMAP.MessageList, query, 'go');
+                    };
+
                     rootMailboxes.addObserverForKey('[]', {
                         go: function(rootMailboxes, key) {
                             rootMailboxes.removeObserverForKey(key, this, 'go');
                             that._oInbox = JMAP.mail.getMailboxForRole(null, 'inbox');
+                            mailboxMessageList(that._oInbox.id());
                         }
                     }, 'go');
                     JMAP.auth.addObserverForKey('isAuthenticated', {
@@ -65,7 +90,7 @@ sap.ui.define(["./JMapTreeBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                         }
                     }, 'fetchInitialData');
 
-                    var allMailboxes = new O.ObservableArray(null, {
+                    const allMailboxes = new O.ObservableArray(null, {
                         content: JMAP.store.getQuery('allMailboxes', O.LocalQuery, {
                             Type: JMAP.Mailbox
                         }),
@@ -85,10 +110,11 @@ sap.ui.define(["./JMapTreeBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                     JMAP.store.on(JMAP.Mailbox, allMailboxes, 'contentDidChange');
 
 
-                    var server = this.sBaseUrl + "/authentication";
-                    var username = this.sUsername;
-                    var password = this.sPassword;
-                    var accessToken = 'Basic ' + btoa(username + ':' + password);
+
+                    const server = this.sBaseUrl + "/authentication";
+                    const username = this.sUsername;
+                    const password = this.sPassword;
+                    const accessToken = 'Basic ' + btoa(username + ':' + password);
                     JMAP.auth.fetchSession(server, accessToken, username, password);
 
                 });

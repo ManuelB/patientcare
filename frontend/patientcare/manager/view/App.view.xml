@@ -32,10 +32,10 @@
                     <f:beginColumnPages>
                         <Page>
                             <List
-                            items="{/ProductCollection}"
+                            items="{JMap>/Mails}"
                             headerText="E-Mails">
                                 <ObjectListItem
-                                    title="{Name}"
+                                    title="{subject}"
                                     type="Active"
                                     press="onListItemPress"
                                     number="{
