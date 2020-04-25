@@ -1,0 +1,70 @@
+<View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:f="sap.f" xmlns:tnt="sap.tnt" displayBlock="true" controllerName="patientcare.manager.view.App" height="100%">
+	<Shell appWidthLimited="false">
+		<tnt:ToolPage id="toolPage">
+			<tnt:header>
+				<f:ShellBar title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" showCopilot="false" showSearch="true" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
+                    <!--<f:menu>
+                        <Menu>
+                            <MenuItem text="Flight booking" icon="sap-icon://flight" />
+                            <MenuItem text="Car rental" icon="sap-icon://car-rental" />
+                        </Menu>
+                    </f:menu>-->
+                    <f:profile>
+                        <f:Avatar initials="UI"/>
+                    </f:profile>
+                </f:ShellBar>
+			</tnt:header>
+            <tnt:sideContent>
+                <tnt:SideNavigation expanded="true" selectedKey="{/selectedKey}" itemSelect=".onItemSelect">
+                    <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
+                        <tnt:NavigationListItem text="{JMap>name}" key="{key}">
+                        </tnt:NavigationListItem>
+                    </tnt:NavigationList>
+                    <tnt:fixedItem>
+                        <tnt:NavigationList items="{path: '/fixedNavigation'}">
+                            <tnt:NavigationListItem text="{title}" icon="{icon}" />
+                        </tnt:NavigationList>
+                    </tnt:fixedItem>
+                </tnt:SideNavigation>
+            </tnt:sideContent>
+            <tnt:mainContents>
+                <f:FlexibleColumnLayout>
+                    <f:beginColumnPages>
+                        <Page>
+                            <List
+                            items="{/ProductCollection}"
+                            headerText="E-Mails">
+                                <ObjectListItem
+                                    title="{Name}"
+                                    type="Active"
+                                    press="onListItemPress"
+                                    number="{
+                                        parts:[{path:'Price'},{path:'CurrencyCode'}],
+                                        type: 'sap.ui.model.type.Currency',
+                                        formatOptions: {showMeasure: false}
+                                    }"
+                                    numberUnit="{CurrencyCode}">
+                                    <firstStatus>
+                                        <ObjectStatus
+                                            text="{Status}"
+                                            state="{
+                                                path: 'Status',
+                                                formatter: 'sap.m.sample.ObjectListItem.Formatter.status'
+                                            }" />
+                                    </firstStatus>
+                                    <ObjectAttribute text="{WeightMeasure} {WeightUnit}" />
+                                    <ObjectAttribute text="{Width} x {Depth} x {Height} {DimUnit}" />
+                                </ObjectListItem>
+                            </List>
+                        </Page>
+                    </f:beginColumnPages>
+                    <f:midColumnPages>
+
+                    </f:midColumnPages>
+                    <f:endColumnPages>
+                    </f:endColumnPages>
+                </f:FlexibleColumnLayout>
+            </tnt:mainContents>
+		</tnt:ToolPage>
+	</Shell>
+</View>

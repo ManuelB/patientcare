@@ -1,0 +1,31 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+    <Dialog resizable="true" draggable="true" title="Configure JMap" contentWidth="30rem">
+        <f:SimpleForm
+			editable="true"
+			layout="ResponsiveGridLayout"
+			labelSpanXL="4"
+			labelSpanL="3"
+			labelSpanM="4"
+			labelSpanS="12"
+			adjustLabelSpan="false"
+			emptySpanXL="0"
+			emptySpanL="4"
+			emptySpanM="0"
+			emptySpanS="0"
+			columnsXL="2"
+			columnsL="1"
+			columnsM="1"
+			singleContainerFullSize="false"
+            ariaLabelledBy="Title1">
+            <Label text="JMap URL" />
+            <Input value="{/baseUrl}" placeholder="e.g. http://localhost/" />
+            <Label text="Your username" />
+            <Input value="{/username}" placeholder="e.g. john@example.com" />
+            <Label text="Your password" />
+            <Input type="Password" value="{/password}" placeholder="e.g. asdloki343sfds" />
+        </f:SimpleForm>
+        <buttons>
+            <Button text="Save JMap Configuration" press="onSave" enabled="{= ${/baseUrl} !== '' &amp;&amp; ${/username} !== '' &amp;&amp; ${/password} !== ''}" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

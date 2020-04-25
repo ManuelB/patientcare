@@ -1,0 +1,38 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+    <Dialog resizable="true" draggable="true" title="OpenPGP Key Pair" contentWidth="30rem">
+        <f:SimpleForm
+			editable="true"
+			layout="ResponsiveGridLayout"
+			labelSpanXL="4"
+			labelSpanL="3"
+			labelSpanM="4"
+			labelSpanS="12"
+			adjustLabelSpan="false"
+			emptySpanXL="0"
+			emptySpanL="4"
+			emptySpanM="0"
+			emptySpanS="0"
+			columnsXL="2"
+			columnsL="1"
+			columnsM="1"
+			singleContainerFullSize="false"
+            ariaLabelledBy="Title1">
+            <Label text="Your name" />
+            <Input value="{/name}" placeholder="e.g. John Doe" />
+            <Label text="Your email" />
+            <Input value="{/email}" placeholder="e.g. john@example.com" />
+            <Label text="Your passphrase" />
+            <Input value="{/passphrase}" placeholder="e.g. super long and hard to guess secret" />
+            <Label text="Public key armored" />
+            <TextArea value="{/OpenPGPKeyPair/publicKeyArmored}" rows="7"></TextArea>
+            <Label text="Private key armored" />
+            <TextArea value="{/OpenPGPKeyPair/privateKeyArmored}" rows="7"></TextArea>
+            <Label text="Revocation certificate" />
+            <TextArea value="{/OpenPGPKeyPair/revocationCertificate}" rows="7"></TextArea>
+        </f:SimpleForm>
+        <buttons>
+            <Button text="New key pair and upload to keys.openpgp.org" press="onNewKey" id="newKey" enabled="{= ${/name} !== '' &amp;&amp; ${/email} !== ''" />
+            <Button text="Save Key Pair" press="onSave" enabled="{= ${/OpenPGPKeyPair/publicKeyArmored} !== '' &amp;&amp; ${/OpenPGPKeyPair/privateKeyArmored} !== ''}" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

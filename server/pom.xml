@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.patientcare</groupId>
+	<artifactId>server</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<properties>
+		<maven.compiler.target>12</maven.compiler.target>
+		<maven.compiler.source>12</maven.compiler.source>
+	</properties>
+	<dependencies>
+		<!-- To run the server execute the following command -->
+		<!-- sudo mvn exec:exec -Dexec.executable="java" -Dexec.args="-Dworking.directory=james 
+			-Dlogback.configurationFile=james/conf/logback.xml -classpath %classpath 
+			org.apache.james.MemoryJamesServerMain" -->
+		<!-- Debug: sudo mvn exec:exec -Dexec.executable="java" -Dexec.args="-agentlib:jdwp=transport=dsocket,address=7676,server=y,suspend=y 
+			-Dworking.directory=james -Dlogback.configurationFile=james/conf/logback.xml 
+			-classpath %classpath org.apache.james.MemoryJamesServerMain" -->
+		<!-- https://mvnrepository.com/artifact/org.apache.james/james-server -->
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-memory-guice</artifactId>
+			<version>3.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.james</groupId>
+			<artifactId>james-server-jmap-rfc-8621</artifactId>
+			<version>3.5.0</version>
+		</dependency>
+	</dependencies>
+</project>

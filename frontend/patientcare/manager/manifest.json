@@ -1,0 +1,67 @@
+{
+    "_version": "1.1.0",
+    "sap.app": {
+        "_version": "1.1.0",
+        "id": "patientcare.manager",
+        "type": "application",
+        "title": "{patientcareManager}}",
+        "description": "{{patientcareManager}}",
+        "applicationVersion": {
+            "version": "1.0.0"
+        }
+    },
+    "sap.ui": {
+        "_version": "1.1.0",
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        },
+        "supportedThemes": [
+            "sap_fiori_3"
+        ]
+    },
+    "sap.ui5": {
+        "_version": "1.1.0",
+        "rootView": {
+            "viewName": "patientcare.manager.view.App",
+            "type": "XML"
+        },
+        "dependencies": {
+            "minUI5Version": "1.68.1",
+            "libs": {
+                "sap.m": {
+
+                },
+                "sap.f": {
+
+                },
+                "sap.ui.layout": {
+
+                }
+            }
+        },
+        "models": {
+            "JMap": {
+                "type": "patientcare.manager.model.JMap"
+            },
+            "OpenPGP": {
+                "type": "patientcare.manager.model.OpenPGP"
+            },
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "patientcare.manager.i18n.i18n"
+                }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router"
+            },
+            "routes": [],
+            "targets": {}
+        }
+    }
+}
