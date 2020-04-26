@@ -39,6 +39,12 @@
                 },
                 "sap.ui.layout": {
 
+                },
+                "sap.tnt": {
+
+                },
+                "sap.uxap": {
+
                 }
             }
         },
@@ -58,10 +64,26 @@
         },
         "routing": {
             "config": {
-                "routerClass": "sap.m.routing.Router"
+                "routerClass": "sap.f.routing.Router",
+                "viewType": "XML",
+                "viewPath": "patientcare.manager.view",
+                "controlId": "fcl",
+                "transition": "slide",
+                "async": true
             },
-            "routes": [],
-            "targets": {}
+            "routes": [{
+                "pattern": "EMail/{EMailId}/{layout}",
+                "name": "EMail",
+                "target": [
+                    "EMail"
+                ]
+            }],
+            "targets": {
+                "EMail": {
+                    "viewName": "EMail",
+                    "controlAggregation": "midColumnPages"
+                }
+            }
         }
     }
 }

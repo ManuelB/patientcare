@@ -28,32 +28,28 @@
                 </tnt:SideNavigation>
             </tnt:sideContent>
             <tnt:mainContents>
-                <f:FlexibleColumnLayout>
+                <f:FlexibleColumnLayout id="fcl" stateChange="onStateChanged"	layout="{Layout>/layout}" backgroundDesign="Solid">
                     <f:beginColumnPages>
                         <Page>
                             <List
-                            items="{JMap>/Mails}"
+                            items="{JMap>/EMails}"
                             headerText="E-Mails">
                                 <ObjectListItem
-                                    title="{subject}"
+                                    title="{JMap>subject}"
                                     type="Active"
-                                    press="onListItemPress"
-                                    number="{
-                                        parts:[{path:'Price'},{path:'CurrencyCode'}],
-                                        type: 'sap.ui.model.type.Currency',
-                                        formatOptions: {showMeasure: false}
-                                    }"
-                                    numberUnit="{CurrencyCode}">
+                                    press="onEMailPress">
                                     <firstStatus>
-                                        <ObjectStatus
-                                            text="{Status}"
-                                            state="{
-                                                path: 'Status',
-                                                formatter: 'sap.m.sample.ObjectListItem.Formatter.status'
-                                            }" />
+                                        <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
                                     </firstStatus>
-                                    <ObjectAttribute text="{WeightMeasure} {WeightUnit}" />
-                                    <ObjectAttribute text="{Width} x {Depth} x {Height} {DimUnit}" />
+                                    <ObjectAttribute text="{
+                                        path: 'JMap>date',
+                                        type: 'sap.ui.model.type.DateTime',
+                                        formatOptions: {
+                                            source : {
+                                                pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
+                                            }
+                                        }
+                                    }" />
                                 </ObjectListItem>
                             </List>
                         </Page>

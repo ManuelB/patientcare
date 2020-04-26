@@ -1,0 +1,75 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.uxap"
+	xmlns:layout="sap.ui.layout"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+	controllerName="patientcare.manager.view.EMail"
+	height="100%">
+	<ObjectPageLayout id="ObjectPageLayout">
+        <headerTitle>
+			<ObjectPageDynamicHeaderTitle>
+                <expandedHeading>
+                    <m:Title text="{JMap>subject}" wrapping="true"/>
+                </expandedHeading>
+                <actions>
+                    <m:Button icon="sap-icon://share-2" tooltip="Share"></m:Button>
+                </actions>
+            </ObjectPageDynamicHeaderTitle>
+        </headerTitle>
+        <headerContent>
+			<m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
+				<f:Avatar
+                    class="sapUiTinyMarginEnd"
+                    fallbackIcon="sap-icon://email">
+				</f:Avatar>
+				<m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Date: {
+                        path: 'JMap>date',
+                        type: 'sap.ui.model.type.DateTime',
+                        formatOptions: {
+                            source : {
+                                pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
+                            }
+                        }
+                    }" />
+					<m:Label text="From: {JMap>from/name} &lt;{JMap>from/email}&gt;"/>
+                        <!-- maybe use repeat: https://ui5.sap.com/#/topic/512e545ba66f4214ba0de1eb56f319e1 -->
+					<m:Label text="To: {JMap>to/0/name} &lt;{JMap>to/0/email}&gt;"/>
+				</m:VBox>
+			</m:FlexBox>
+        </headerContent>
+        <sections>
+			<ObjectPageSection title="Content">
+				<subSections>
+					<ObjectPageSubSection>
+						<blocks>
+                            <m:Text text="{JMap>textBody}" />
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+            <ObjectPageSection title="Attachments" visible="{JMap>hasAttachment}">
+				<subSections>
+					<ObjectPageSubSection>
+						<blocks>
+							<m:Table
+								id="attachments"
+								items="{JMap>attachments}">
+								<m:columns>
+									<m:Column/>
+								</m:columns>
+								<m:items>
+									<m:ColumnListItem type="Navigation">
+										<m:cells>
+											<m:ObjectIdentifier text="{products>text}"/>
+										</m:cells>
+									</m:ColumnListItem>
+								</m:items>
+							</m:Table>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+        </sections>
+    </ObjectPageLayout>
+</mvc:View>
