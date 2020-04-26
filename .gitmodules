@@ -1,6 +1,0 @@
-[submodule "jmap-js"]
-	path = jmap-js
-	url = https://github.com/jmapio/jmap-js.git
-[submodule "overture"]
-	path = overture
-	url = https://github.com/fastmail/overture
