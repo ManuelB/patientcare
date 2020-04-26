@@ -72,16 +72,26 @@
                 "async": true
             },
             "routes": [{
-                "pattern": "EMail/{EMailId}/{layout}",
-                "name": "EMail",
-                "target": [
-                    "EMail"
-                ]
-            }],
+                    "pattern": "Home/{layout}",
+                    "name": "Home"
+                },
+                {
+                    "pattern": "EMail/{EMailId}/{layout}:blobId:",
+                    "name": "EMail",
+                    "target": [
+                        "EMail",
+                        "Attachment"
+                    ]
+                }
+            ],
             "targets": {
                 "EMail": {
                     "viewName": "EMail",
                     "controlAggregation": "midColumnPages"
+                },
+                "Attachment": {
+                    "viewName": "Attachment",
+                    "controlAggregation": "endColumnPages"
                 }
             }
         }

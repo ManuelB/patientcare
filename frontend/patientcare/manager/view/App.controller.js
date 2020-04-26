@@ -66,7 +66,12 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
         onExit: function() {
             this.oRouter.detachRouteMatched(this.onRouteMatched, this);
         },
+        onCollapseExpandPress: function() {
+            var oSideNavigation = this.byId("sideNavigation");
+            var bExpanded = oSideNavigation.getExpanded();
 
+            oSideNavigation.setExpanded(!bExpanded);
+        },
         onEMailPress: function(oEvent) {
             var oNextUIState = this.getOwnerComponent().getHelper().getNextUIState(1),
                 sEmailId = oEvent.getSource().getBindingContext("JMap").getObject().id;

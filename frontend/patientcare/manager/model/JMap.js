@@ -169,6 +169,34 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/
             });
         };
 
+        JMap.prototype.getMessages = function(sMessageId) {
+            this.loggedIn().then(() => {
+                const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
+                fetch(sApiUrl, {
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json; charset=UTF-8",
+                        "Accept": "application/json",
+                        "Authorization": this._oSessionInfo.accessToken
+                    },
+                    "body": JSON.stringify([
+                        ["getMessages", {
+                            ids: [sMessageId],
+                            properties: ["id", "blobId", "threadId", "mailboxIds", "inReplyToMessageId", "headers", "from", "to", "cc", "bcc", "replyTo", "subject", "date", "size", "preview", "keywords", "hasAttachment", "attachments", "textBody", "htmlBody"]
+                        }, "#2"]
+                    ])
+                }).then((oResponse) => {
+                    return oResponse.json();
+                }).then((oMessagesResponse) => {
+                    console.log(oMessagesResponse);
+                }).catch((oError) => {
+                    Log.error(oError);
+                    MessageBox.error("Could not receive Messages from " + sApiUrl + " " + oError);
+                });
+            });
+
+        };
+
         JMap.prototype.bindProperty = function(sPath, oContext, mParameters) {
             var oBinding = new JSONPropertyBinding(this, sPath, oContext, mParameters);
             oBinding.attachChange(this.onPropertyBinding, this);
@@ -177,6 +205,17 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/
 
         JMap.prototype.onPropertyBinding = function(oEvent) {
             // debugger
+        };
+
+        JMap.prototype.downloadBlob = function(sBlobId) {
+            return this.loggedIn().then(() => {
+                const sDownloadUrl = this.sBaseUrl + this._oSessionInfo.download + "/" + sBlobId;
+                return fetch(sDownloadUrl, {
+                    "headers": {
+                        "Authorization": this._oSessionInfo.accessToken
+                    }
+                });
+            });
         };
 
         return JMap;

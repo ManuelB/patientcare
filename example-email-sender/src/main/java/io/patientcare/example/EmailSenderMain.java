@@ -127,18 +127,28 @@ public class EmailSenderMain {
 			// Set To: header field of the header.
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(patientId + "@" + host));
 
+			String resourceType = "Unknown";
+			String resourceId = "Unknown";
+
 			// Set Subject: header field
-			if(document.containsKey("resourceType") && document.containsKey("id")) {
-				message.setSubject(document.getString("resourceType") + " " + document.getString("id"));
-			} else {
-				message.setSubject("Unknown resource or unknown id");
+			if (document.containsKey("resourceType") && document.containsKey("id")) {
+				resourceType = document.getString("resourceType");
+				resourceId = document.getString("id");
 			}
-			
+			message.setSubject(resourceType + " " + resourceId);
+
 			// Create the message part
 			BodyPart messageBodyPart = new MimeBodyPart();
 
-			// Now set the actual message
-			messageBodyPart.setText(document.toString());
+			try {
+				messageBodyPart
+						.setText(resourceType + " issued on " + (document.containsKey("issued")
+								? document.getString("issued")
+								: "unknown"));
+			} catch (Exception ex) {
+				// Now set the actual message
+				messageBodyPart.setText(document.toString());
+			}
 
 			// Create a multipar message
 			Multipart multipart = new MimeMultipart();
@@ -149,6 +159,8 @@ public class EmailSenderMain {
 			// Part two is attachment
 			InternetHeaders headers = new InternetHeaders();
 			headers.addHeader("Content-Type", "application/fhir+json");
+			headers.addHeader("Content-Disposition",
+					"attachment; filename=" + resourceType + "-" + resourceId + ".json");
 			messageBodyPart = new MimeBodyPart(headers, document.toString().getBytes("UTF-8"));
 			multipart.addBodyPart(messageBodyPart);
 
@@ -168,12 +180,12 @@ public class EmailSenderMain {
 	synchronized static void checkAndCreateUser(String host, String patientId) {
 		if (!userCreated.containsKey(patientId)) {
 			Response response = ClientBuilder.newClient().target("http://" + host + ":8000")
-					.path("/users/" + patientId+"@"+host).request()
+					.path("/users/" + patientId + "@" + host).request()
 					.buildPut(Entity.json(Json.createObjectBuilder().add("password", "example").build())).invoke();
 			if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
 				System.out.println(response.readEntity(String.class));
 			} else {
-				System.out.println(patientId+" created");
+				System.out.println(patientId + " created");
 			}
 			userCreated.put(patientId, true);
 		}

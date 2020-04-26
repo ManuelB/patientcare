@@ -2,20 +2,18 @@
 	<Shell appWidthLimited="false">
 		<tnt:ToolPage id="toolPage">
 			<tnt:header>
-				<f:ShellBar title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" showCopilot="false" showSearch="true" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
-                    <!--<f:menu>
-                        <Menu>
-                            <MenuItem text="Flight booking" icon="sap-icon://flight" />
-                            <MenuItem text="Car rental" icon="sap-icon://car-rental" />
-                        </Menu>
-                    </f:menu>-->
+				<f:ShellBar title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
                     <f:profile>
                         <f:Avatar initials="UI"/>
                     </f:profile>
+                    <f:searchManager>
+                        <f:SearchManager enableSuggestions="true"
+                                search="onSearch" />
+                    </f:searchManager>
                 </f:ShellBar>
 			</tnt:header>
             <tnt:sideContent>
-                <tnt:SideNavigation expanded="true" selectedKey="{/selectedKey}" itemSelect=".onItemSelect">
+                <tnt:SideNavigation id="sideNavigation" expanded="true" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
                     <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
                         <tnt:NavigationListItem text="{JMap>name}" key="{key}">
                         </tnt:NavigationListItem>
@@ -30,32 +28,38 @@
             <tnt:mainContents>
                 <f:FlexibleColumnLayout id="fcl" stateChange="onStateChanged"	layout="{Layout>/layout}" backgroundDesign="Solid">
                     <f:beginColumnPages>
-                        <Page>
-                            <List
-                            items="{JMap>/EMails}"
-                            headerText="E-Mails">
-                                <ObjectListItem
-                                    title="{JMap>subject}"
-                                    type="Active"
-                                    press="onEMailPress">
-                                    <firstStatus>
-                                        <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
-                                    </firstStatus>
-                                    <ObjectAttribute text="{
-                                        path: 'JMap>date',
-                                        type: 'sap.ui.model.type.DateTime',
-                                        formatOptions: {
-                                            source : {
-                                                pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
+                        <f:DynamicPage>
+                            <f:title>
+                                <f:DynamicPageTitle>
+                                    <f:heading>
+                                        <Title text="E-Mails" />
+                                    </f:heading>
+                                </f:DynamicPageTitle>
+                            </f:title>
+                            <f:content>
+                                <List items="{JMap>/EMails}">
+                                    <ObjectListItem
+                                        title="{JMap>subject}"
+                                        type="Active"
+                                        press="onEMailPress">
+                                        <firstStatus>
+                                            <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
+                                        </firstStatus>
+                                        <ObjectAttribute text="{
+                                            path: 'JMap>date',
+                                            type: 'sap.ui.model.type.DateTime',
+                                            formatOptions: {
+                                                source : {
+                                                    pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
+                                                }
                                             }
-                                        }
-                                    }" />
-                                </ObjectListItem>
-                            </List>
-                        </Page>
+                                        }" />
+                                    </ObjectListItem>
+                                </List>
+                            </f:content>
+                        </f:DynamicPage>
                     </f:beginColumnPages>
                     <f:midColumnPages>
-
                     </f:midColumnPages>
                     <f:endColumnPages>
                     </f:endColumnPages>

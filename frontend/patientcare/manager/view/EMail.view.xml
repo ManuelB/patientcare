@@ -12,8 +12,22 @@
                     <m:Title text="{JMap>subject}" wrapping="true"/>
                 </expandedHeading>
                 <actions>
-                    <m:Button icon="sap-icon://share-2" tooltip="Share"></m:Button>
-                </actions>
+					<m:Button icon="sap-icon://share-2" tooltip="Share"></m:Button>
+				</actions>
+				<navigationActions>
+					<m:OverflowToolbarButton type="Transparent"
+							icon="sap-icon://full-screen" press="onFullScreen"
+							tooltip="Enter Full Screen Mode"
+							visible="{= ${Layout>/actionButtonsInfo/midColumn/fullScreen} !== null }" />
+					<m:OverflowToolbarButton type="Transparent"
+							icon="sap-icon://exit-full-screen" press="onExitFullScreen"
+							tooltip="Exit Full Screen Mode"
+							visible="{= ${Layout>/actionButtonsInfo/midColumn/exitFullScreen} !== null }" />
+					<m:OverflowToolbarButton type="Transparent"
+							icon="sap-icon://decline" press="onClose"
+							tooltip="Close column"
+							visible="{= ${Layout>/actionButtonsInfo/midColumn/closeColumn} !== null }" />
+				</navigationActions>
             </ObjectPageDynamicHeaderTitle>
         </headerTitle>
         <headerContent>
@@ -56,12 +70,16 @@
 								id="attachments"
 								items="{JMap>attachments}">
 								<m:columns>
-									<m:Column/>
+									<m:Column><m:Text text="Name"/></m:Column>
+									<m:Column><m:Text text="Type"/></m:Column>
+									<m:Column><m:Text text="Size"/></m:Column>
 								</m:columns>
 								<m:items>
-									<m:ColumnListItem type="Navigation">
+									<m:ColumnListItem type="Navigation" press="onAttachmentItemPress">
 										<m:cells>
-											<m:ObjectIdentifier text="{products>text}"/>
+											<m:ObjectIdentifier text="{JMap>name}"/>
+											<m:Text text="{JMap>type}"/>
+											<m:ObjectNumber number="{JMap>size}" />
 										</m:cells>
 									</m:ColumnListItem>
 								</m:items>
