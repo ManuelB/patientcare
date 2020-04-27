@@ -133,7 +133,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                         let iUnreadMessages = 0;
                         for (let oMailbox of aMailboxes) {
                             this.mMessageBoxId2TotalMessages[oMailbox.id] = oMailbox.totalMessages;
-                            iUnreadMessages += oMailbox.totalMessages;
+                            iUnreadMessages += oMailbox.unreadMessages;
                         }
                         this.fireEvent("totalUnreadMessages", { "count": iUnreadMessages });
                         const oInbox = aMailboxes.filter((o) => o.role == "inbox")[0];
