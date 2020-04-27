@@ -1,13 +1,15 @@
-sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/Log", "sap/m/MessageBox",
-        'sap/ui/model/json/JSONPropertyBinding'
-    ],
-    function(JSONModel, Fragment, Log, MessageBox, JSONPropertyBinding) {
+sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/Log", "sap/m/MessageBox"],
+    function(JMapListBinding, JSONModel, Fragment, Log, MessageBox, ChangeReason) {
         "use strict";
 
         const JMap = JSONModel.extend("patientcare.manager.model.JMap", {
             "constructor": function() {
                 JSONModel.apply(this, arguments);
                 this._oInboxId = null;
+                this.mMessageBoxId2TotalMessages = {};
+                this._pInboxFound = new Promise((fnResolve) => {
+                    this._fnInboxFound = fnResolve;
+                });
                 this._pLoggedIn = new Promise((fnResolve) => {
                     this._fnLoggedIn = fnResolve;
                 });
@@ -48,13 +50,16 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/
             return this._pLoggedIn;
         };
 
+        JMap.prototype.inboxFound = function() {
+            return this._pInboxFound;
+        };
+
         JMap.prototype.initModel = function() {
             try {
                 this.setData({ "Mailboxes": [], "Emails": [] });
                 this.login();
-                this.loggedIn()
-                    .then(() => this.getMailboxes())
-                    .then(() => this.getMessageList(this._oInbox.id));
+                this.getMailboxes();
+                // this.inboxFound().then((oInbox) => this.getMessageList());
             } catch (e) {
                 Log.error(e);
             }
@@ -106,72 +111,116 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/
          * This functions sends a getMailboxes requests and sets the property /Mailboxes
          */
         JMap.prototype.getMailboxes = function() {
-            return new Promise((fnResolve) => {
-                const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
-                fetch(sApiUrl, {
-                    "method": "POST",
-                    "headers": {
-                        "Content-Type": "application/json; charset=UTF-8",
-                        "Accept": "application/json",
-                        "Authorization": this._oSessionInfo.accessToken
-                    },
-                    "body": JSON.stringify([
-                        ["getMailboxes", {}, "#0"]
-                    ])
-                }).then((oResponse) => {
-                    return oResponse.json();
-                }).then((oMailboxesResponse) => {
-                    const aMailboxes = oMailboxesResponse[0][1].list;
-                    this._oInbox = aMailboxes.filter((o) => o.role == "inbox")[0];
-                    this.setProperty("/Mailboxes", aMailboxes);
-                    fnResolve();
-                }).catch((oError) => {
-                    Log.error(oError);
-                    MessageBox.error("Could not receive Mailboxes from " + sApiUrl + " " + oError);
+            return this.loggedIn().then(() => {
+                return new Promise((fnResolve, fnReject) => {
+                    const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
+
+                    this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
+                    fetch(sApiUrl, {
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json; charset=UTF-8",
+                            "Accept": "application/json",
+                            "Authorization": this._oSessionInfo.accessToken
+                        },
+                        "body": JSON.stringify([
+                            ["getMailboxes", {}, "#0"]
+                        ])
+                    }).then((oResponse) => {
+                        return oResponse.json();
+                    }).then((oMailboxesResponse) => {
+                        const aMailboxes = oMailboxesResponse[0][1].list;
+                        let iUnreadMessages = 0;
+                        for (let oMailbox of aMailboxes) {
+                            this.mMessageBoxId2TotalMessages[oMailbox.id] = oMailbox.totalMessages;
+                            iUnreadMessages += oMailbox.totalMessages;
+                        }
+                        const oInbox = aMailboxes.filter((o) => o.role == "inbox")[0];
+                        this._oInboxId = oInbox.id;
+                        this._fnInboxFound(oInbox);
+                        this.setProperty("/Mailboxes", aMailboxes);
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                        fnResolve(aMailboxes);
+                    }).catch((oError) => {
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                        Log.error(oError);
+                        this.fireRequestFailed(oError);
+                        MessageBox.error("Could not receive Mailboxes from " + sApiUrl + " " + oError);
+                        fnReject(oError);
+                    });
                 });
             });
         };
 
-        JMap.prototype.getMessageList = function(sMailboxId) {
-            const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
-            fetch(sApiUrl, {
-                "method": "POST",
-                "headers": {
-                    "Content-Type": "application/json; charset=UTF-8",
-                    "Accept": "application/json",
-                    "Authorization": this._oSessionInfo.accessToken
-                },
-                "body": JSON.stringify([
-                    ["getMessageList", {
-                        filter: {
-                            inMailboxes: [sMailboxId]
+
+        JMap.prototype.getMessageListCount = function(aMailboxIds) {
+            if (aMailboxIds === undefined) {
+                return this.mMessageBoxId2TotalMessages[this._oInboxId];
+            } else {
+                throw new Error("Not implemented yet");
+            }
+        };
+
+        JMap.prototype.getMessageList = function(aMailboxIds, iStartIndex, iLength, aSort) {
+            return Promise.all([this.loggedIn(), this.inboxFound()]).then(() => {
+                return new Promise((fnResolve, fnReject) => {
+
+                    if (iLength === undefined) {
+                        iLength = this.iSizeLimit;
+                    }
+                    const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
+
+                    this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
+                    fetch(sApiUrl, {
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json; charset=UTF-8",
+                            "Accept": "application/json",
+                            "Authorization": this._oSessionInfo.accessToken
                         },
-                        sort: ["date desc", "id desc"],
-                        collapseThreads: true,
-                        position: 0,
-                        limit: 10,
-                        fetchMessages: true,
-                        fetchMessageProperties: ["id", "blobId", "threadId", "mailboxIds", "inReplyToMessageId", "headers", "from", "to", "cc", "bcc", "replyTo", "subject", "date", "size", "preview", "keywords", "hasAttachment", "attachments", "textBody", "htmlBody"]
-                    }, "#1"]
-                ])
-            }).then((oResponse) => {
-                return oResponse.json();
-            }).then((oMessageListResponse) => {
-                const aMessages = oMessageListResponse[1][1].list;
-                const mMessages = {};
-                for (let oMessage of aMessages) {
-                    mMessages[oMessage.id] = oMessage;
-                }
-                this.setProperty("/EMails", mMessages);
-            }).catch((oError) => {
-                Log.error(oError);
-                MessageBox.error("Could not receive MessageList from " + sApiUrl + " " + oError);
+                        "body": JSON.stringify([
+                            ["getMessageList", {
+                                filter: {
+                                    inMailboxes: aMailboxIds === undefined ? [this._oInboxId] : aMailboxIds
+                                },
+                                sort: aSort === undefined ? ["date desc", "id desc"] : aSort,
+                                collapseThreads: true,
+                                position: iStartIndex === undefined ? 0 : iStartIndex,
+                                limit: iLength,
+                                fetchMessages: true,
+                                fetchMessageProperties: ["id", "blobId", "threadId", "mailboxIds", "inReplyToMessageId", "headers", "from", "to", "cc", "bcc", "replyTo", "subject", "date", "size", "preview", "keywords", "hasAttachment", "attachments", "textBody", "htmlBody"]
+                            }, "#1"]
+                        ])
+                    }).then((oResponse) => {
+                        return oResponse.json();
+                    }).then((oMessageListResponse) => {
+                        const aMessages = oMessageListResponse[1][1].list;
+                        const mMessages = {};
+                        const oldEmails = this.getProperty("/EMails");
+                        for (let i = 0; i < iStartIndex; i++) {
+                            mMessages[i] = oldEmails[Object.keys()[i]];
+                        }
+                        for (let oMessage of aMessages) {
+                            mMessages[oMessage.id] = oMessage;
+                        }
+                        this.setProperty("/EMails", mMessages);
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                        fnResolve(mMessages);
+                    }).catch((oError) => {
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                        Log.error(oError);
+                        this.fireRequestFailed(oError);
+                        MessageBox.error("Could not receive MessageList from " + sApiUrl + " " + oError);
+                        fnReject(oError);
+                    });
+                });
             });
         };
 
         JMap.prototype.getMessages = function(sMessageId) {
             this.loggedIn().then(() => {
                 const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
+                this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
                 fetch(sApiUrl, {
                     "method": "POST",
                     "headers": {
@@ -189,22 +238,24 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/
                     return oResponse.json();
                 }).then((oMessagesResponse) => {
                     console.log(oMessagesResponse);
+                    this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                 }).catch((oError) => {
+                    this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                     Log.error(oError);
+                    this.fireRequestFailed(oError);
                     MessageBox.error("Could not receive Messages from " + sApiUrl + " " + oError);
                 });
             });
 
         };
 
-        JMap.prototype.bindProperty = function(sPath, oContext, mParameters) {
-            var oBinding = new JSONPropertyBinding(this, sPath, oContext, mParameters);
-            oBinding.attachChange(this.onPropertyBinding, this);
+        /**
+         * @see sap.ui.model.Model.prototype.bindList
+         *
+         */
+        JSONModel.prototype.bindList = function(sPath, oContext, aSorters, aFilters, mParameters) {
+            var oBinding = new JMapListBinding(this, sPath, oContext, aSorters, aFilters, mParameters);
             return oBinding;
-        };
-
-        JMap.prototype.onPropertyBinding = function(oEvent) {
-            // debugger
         };
 
         JMap.prototype.downloadBlob = function(sBlobId) {

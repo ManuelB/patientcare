@@ -15,7 +15,7 @@
             <tnt:sideContent>
                 <tnt:SideNavigation id="sideNavigation" expanded="true" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
                     <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
-                        <tnt:NavigationListItem text="{JMap>name}" key="{key}">
+                        <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages})" key="{key}">
                         </tnt:NavigationListItem>
                     </tnt:NavigationList>
                     <tnt:fixedItem>
@@ -37,10 +37,17 @@
                                 </f:DynamicPageTitle>
                             </f:title>
                             <f:content>
-                                <List items="{JMap>/EMails}">
+                                <List showUnread="true" items="{path: 'JMap>/EMails', sorter : [{
+                                    path : 'date',
+                                    descending: true
+                                 },{
+                                    path : 'id' 
+                                 }]
+                                }" growing="true" growingScrollToLoad="true">
                                     <ObjectListItem
                                         title="{JMap>subject}"
                                         type="Active"
+                                        unread="true"
                                         press="onEMailPress">
                                         <firstStatus>
                                             <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
