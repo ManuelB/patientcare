@@ -2,9 +2,12 @@
 sap.ui.define([
         "sap/ui/model/json/JSONListBinding",
         "sap/base/Log",
-        "sap/ui/model/ChangeReason"
+        "sap/ui/model/ChangeReason",
+        "sap/ui/model/FilterType",
+        "sap/ui/model/FilterProcessor",
+        "sap/ui/model/Filter"
     ],
-    function(JSONListBinding, Log, ChangeReason) {
+    function(JSONListBinding, Log, ChangeReason, FilterType, FilterProcessor, Filter) {
         "use strict";
 
 
@@ -32,6 +35,33 @@ sap.ui.define([
          */
         var JMapListBinding = JSONListBinding.extend("patiencare.manager.model.JMapListBinding");
 
+        JMapListBinding.prototype.filter = function(aFilters, sFilterType) {
+            this.iLastTotalLoaded = undefined;
+
+            this.oModel.checkFilterOperation(aFilters);
+
+            if (this.bSuspended) {
+                this.checkUpdate(true);
+            }
+            if (aFilters instanceof Filter) {
+                aFilters = [aFilters];
+            }
+            if (sFilterType == FilterType.Application) {
+                this.aApplicationFilters = aFilters || [];
+            } else if (sFilterType == FilterType.Control) {
+                this.aFilters = aFilters || [];
+            } else {
+                //Previous behaviour
+                this.aFilters = aFilters || [];
+                this.aApplicationFilters = [];
+            }
+
+            this.oCombinedFilter = FilterProcessor.combineFilters(this.aFilters, this.aApplicationFilters);
+            // const retVal = JSONListBinding.prototype.filter.apply(this, arguments);
+            this._fireChange({ reason: ChangeReason.Filter });
+            // return retVal;
+        };
+
         /**
          * Return contexts for the list.
          *
@@ -53,6 +83,7 @@ sap.ui.define([
                 iLength = Math.min(this.iLength, this.oModel.iSizeLimit);
             }
 
+            this.updateIndices();
             var aContexts = this._getContexts(iStartIndex, iLength),
                 aContextData = [];
 
@@ -61,8 +92,22 @@ sap.ui.define([
             // always load the requested emails
             if (this.sPath == "/EMails" && (this.iLastTotalLoaded == undefined || iStartIndex + iLength > this.iLastTotalLoaded)) {
                 this.fireDataRequested();
-                this.oModel.getMessageList(undefined, iStartIndex, iLength, aSort).then(() => {
-                    this.iTotalLength = this.oModel.getMessageListCount(undefined);
+
+                let aMailbox = undefined;
+                let aFilters = this.aFilters.filter(o => o.sPath === "inMailboxes");
+                if (aFilters.length > 0) {
+                    aMailbox = [aFilters[0].oValue1];
+                }
+
+                let sQuery = undefined;
+                aFilters = this.aFilters.filter(o => o.sPath === "query");
+                if (aFilters.length > 0) {
+                    sQuery = aFilters[0].oValue1;
+                }
+
+                this.oModel.getMessageList(aMailbox, iStartIndex, iLength, aSort, sQuery).then(() => {
+                    this.iTotalLength = this.oModel.getMessageListCount(aMailbox);
+                    // this.update();
                     this.fireDataReceived();
                     this._fireChange({ reason: ChangeReason.Change });
                 });

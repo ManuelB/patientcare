@@ -2,20 +2,19 @@
 	<Shell appWidthLimited="false">
 		<tnt:ToolPage id="toolPage">
 			<tnt:header>
-				<f:ShellBar title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
+				<f:ShellBar id="shellBar" title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
                     <f:profile>
                         <f:Avatar initials="UI"/>
                     </f:profile>
                     <f:searchManager>
-                        <f:SearchManager enableSuggestions="true"
-                                search="onSearch" />
+                        <f:SearchManager liveChange="onSearch" />
                     </f:searchManager>
                 </f:ShellBar>
 			</tnt:header>
             <tnt:sideContent>
                 <tnt:SideNavigation id="sideNavigation" expanded="true" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
                     <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
-                        <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages})" key="{key}">
+                        <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages}/{JMap>totalMessages})" key="{key}">
                         </tnt:NavigationListItem>
                     </tnt:NavigationList>
                     <tnt:fixedItem>
@@ -43,7 +42,7 @@
                                  },{
                                     path : 'id' 
                                  }]
-                                }" growing="true" growingScrollToLoad="true">
+                                }" growing="true" growingScrollToLoad="true" id="email">
                                     <ObjectListItem
                                         title="{JMap>subject}"
                                         type="Active"

@@ -1,4 +1,6 @@
-sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f/FlexibleColumnLayout"], function(Controller, ResizeHandler, FlexibleColumnLayout) {
+sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f/FlexibleColumnLayout",
+    "sap/ui/model/Filter", "sap/ui/model/FilterOperator"
+], function(Controller, ResizeHandler, FlexibleColumnLayout, Filter, FilterOperator) {
     "use strict";
 
     return Controller.extend("patientcare.manager.view.App", {
@@ -12,6 +14,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
             } else {
                 Log.warning("Could not get component for AppController for entity " + e);
             }
+            oComponent.getModel("JMap").attachEvent("totalUnreadMessages", function(oEvent) {
+                this.byId("shellBar").setNotificationsNumber(oEvent.getParameter("count") + "");
+            }, this);
         },
         onRouteMatched: function(oEvent) {
             var sRouteName = oEvent.getParameter("name"),
@@ -72,9 +77,27 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
 
             oSideNavigation.setExpanded(!bExpanded);
         },
+        onItemSelect: function(oEvent) {
+            this._sSelectedMailbox = oEvent.getParameter("item").getBindingContext("JMap").getProperty("id");
+            this.applyFilter();
+        },
+        onSearch: function(oEvent) {
+            this._sQuery = oEvent.getParameter("newValue");
+            this.applyFilter();
+        },
+        applyFilter: function() {
+            const aFilters = [];
+            if (this._sSelectedMailbox) {
+                aFilters.push(new Filter("inMailboxes", FilterOperator.EQ, this._sSelectedMailbox));
+            }
+            if (this._sQuery && this._sQuery.length > 2) {
+                aFilters.push(new Filter("query", FilterOperator.Contains, this._sQuery));
+            }
+            this.byId("email").getBinding("items").filter(aFilters);
+        },
         onEMailPress: function(oEvent) {
             var oNextUIState = this.getOwnerComponent().getHelper().getNextUIState(1),
-                sEmailId = oEvent.getSource().getBindingContext("JMap").getObject().id;
+                sEmailId = oEvent.getSource().getBindingContext("JMap").getProperty("id");
 
             var oParams = { layout: oNextUIState.layout };
             oParams["EMailId"] = sEmailId;

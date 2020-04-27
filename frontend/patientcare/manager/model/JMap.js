@@ -135,6 +135,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                             this.mMessageBoxId2TotalMessages[oMailbox.id] = oMailbox.totalMessages;
                             iUnreadMessages += oMailbox.totalMessages;
                         }
+                        this.fireEvent("totalUnreadMessages", { "count": iUnreadMessages });
                         const oInbox = aMailboxes.filter((o) => o.role == "inbox")[0];
                         this._oInboxId = oInbox.id;
                         this._fnInboxFound(oInbox);
@@ -154,14 +155,16 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
 
 
         JMap.prototype.getMessageListCount = function(aMailboxIds) {
-            if (aMailboxIds === undefined) {
+            if (aMailboxIds === undefined || aMailboxIds.length === 0) {
                 return this.mMessageBoxId2TotalMessages[this._oInboxId];
+            } else if (aMailboxIds.length === 1) {
+                return this.mMessageBoxId2TotalMessages[aMailboxIds[0]];
             } else {
                 throw new Error("Not implemented yet");
             }
         };
 
-        JMap.prototype.getMessageList = function(aMailboxIds, iStartIndex, iLength, aSort) {
+        JMap.prototype.getMessageList = function(aMailboxIds, iStartIndex, iLength, aSort, sQuery) {
             return Promise.all([this.loggedIn(), this.inboxFound()]).then(() => {
                 return new Promise((fnResolve, fnReject) => {
 
@@ -171,6 +174,23 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                     const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
 
                     this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
+
+                    const oParams = {
+                        filter: {
+
+                        },
+                        sort: aSort === undefined ? ["date desc", "id desc"] : aSort,
+                        collapseThreads: true,
+                        position: iStartIndex === undefined ? 0 : iStartIndex,
+                        limit: iLength,
+                        fetchMessages: true,
+                        fetchMessageProperties: ["id", "blobId", "threadId", "mailboxIds", "inReplyToMessageId", "headers", "from", "to", "cc", "bcc", "replyTo", "subject", "date", "size", "preview", "keywords", "hasAttachment", "attachments", "textBody", "htmlBody"]
+                    };
+                    oParams.filter.inMailboxes = aMailboxIds === undefined ? [this._oInboxId] : aMailboxIds;
+                    if (sQuery) {
+                        oParams.filter.text = sQuery;
+                    }
+
                     fetch(sApiUrl, {
                         "method": "POST",
                         "headers": {
@@ -179,17 +199,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                             "Authorization": this._oSessionInfo.accessToken
                         },
                         "body": JSON.stringify([
-                            ["getMessageList", {
-                                filter: {
-                                    inMailboxes: aMailboxIds === undefined ? [this._oInboxId] : aMailboxIds
-                                },
-                                sort: aSort === undefined ? ["date desc", "id desc"] : aSort,
-                                collapseThreads: true,
-                                position: iStartIndex === undefined ? 0 : iStartIndex,
-                                limit: iLength,
-                                fetchMessages: true,
-                                fetchMessageProperties: ["id", "blobId", "threadId", "mailboxIds", "inReplyToMessageId", "headers", "from", "to", "cc", "bcc", "replyTo", "subject", "date", "size", "preview", "keywords", "hasAttachment", "attachments", "textBody", "htmlBody"]
-                            }, "#1"]
+                            ["getMessageList", oParams, "#1"]
                         ])
                     }).then((oResponse) => {
                         return oResponse.json();
