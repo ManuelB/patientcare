@@ -216,6 +216,12 @@
 				<folder>Sent</folder>
 				<consume>false</consume>
 			</mailet>
+			
+			<mailet match="org.apache.james.mailetcontainer.impl.matchers.And" class="org.apache.james.wkd.mailet.WebKeyDirectoryMailet">
+            	<matcher match="SMTPAuthSuccessful"/>
+            	<matcher match="RecipientIsLocal" />
+            	<matcher match="ReceiverIsRegex=submission-address@.*" />
+            </mailet>
 
 			<!-- Is the recipient is for a local account, deliver it locally -->
 			<mailet match="RecipientIsLocal" class="org.apache.james.jmap.mailet.VacationMailet"/>

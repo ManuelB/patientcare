@@ -6,16 +6,18 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
             "constructor": function() {
                 JSONModel.apply(this, arguments);
                 this._oInboxId = null;
+                this._oOutboxId = null;
                 this.mMessageBoxId2TotalMessages = {};
                 this._pInboxFound = new Promise((fnResolve) => {
                     this._fnInboxFound = fnResolve;
                 });
+                this._pOutboxFound = new Promise((fnResolve) => {
+                    this._fnOutboxFound = fnResolve;
+                });
                 this._pLoggedIn = new Promise((fnResolve) => {
                     this._fnLoggedIn = fnResolve;
                 });
-                if (window.localStorage.getItem("JMap") === null) {
-                    this.requestConfig();
-                } else {
+                if (window.localStorage.getItem("JMap") !== null) {
                     this.loadConfigAndInitModel();
                 }
             }
@@ -54,6 +56,10 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
             return this._pInboxFound;
         };
 
+        JMap.prototype.outboxFound = function() {
+            return this._pOutboxFound;
+        };
+
         JMap.prototype.initModel = function() {
             try {
                 this.setData({ "Mailboxes": [], "Emails": [] });
@@ -71,7 +77,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
          */
         JMap.prototype.login = function() {
             const sAuthentifcationUrl = this.sBaseUrl + "/authentication";
-            const sUsername = this.sUsername;
+            const sUsername = this.transformUser(this.sUsername);
             const sPassword = this.sPassword;
             const sBasicAuthToken = 'Basic ' + btoa(sUsername + ':' + sPassword);
             fetch(sAuthentifcationUrl, {
@@ -136,9 +142,15 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                             iUnreadMessages += oMailbox.unreadMessages;
                         }
                         this.fireEvent("totalUnreadMessages", { "count": iUnreadMessages });
+
                         const oInbox = aMailboxes.filter((o) => o.role == "inbox")[0];
                         this._oInboxId = oInbox.id;
                         this._fnInboxFound(oInbox);
+
+                        const oOutbox = aMailboxes.filter((o) => o.role == "outbox")[0];
+                        this._oOutboxId = oOutbox.id;
+                        this._fnOutboxFound(oOutbox);
+
                         this.setProperty("/Mailboxes", aMailboxes);
                         this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                         fnResolve(aMailboxes);
@@ -263,7 +275,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
          * @see sap.ui.model.Model.prototype.bindList
          *
          */
-        JSONModel.prototype.bindList = function(sPath, oContext, aSorters, aFilters, mParameters) {
+        JMap.prototype.bindList = function(sPath, oContext, aSorters, aFilters, mParameters) {
             var oBinding = new JMapListBinding(this, sPath, oContext, aSorters, aFilters, mParameters);
             return oBinding;
         };
@@ -276,6 +288,115 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                         "Authorization": this._oSessionInfo.accessToken
                     }
                 });
+            });
+        };
+
+        JMap.prototype.createMailAccount = function(sMail, sPassword) {
+            return fetch("http://" + window.location.hostname + ":8000/users/" + this.transformUser(sMail), {
+                "method": "PUT",
+                "body": JSON.stringify({ "password": sPassword })
+            }).then((oResponse) => {
+                if (oResponse.status === 204) {
+                    window.localStorage.setItem("JMap", JSON.stringify({ "baseUrl": "http://" + window.location.hostname, "username": sMail, "password": sPassword }))
+                    this.loadConfigAndInitModel();
+                } else {
+                    oResponse.text().then((sError) => {
+                        Log.error(sError)
+                    })
+                    throw new Error("Could not create mail account: " + oResponse.status);
+                }
+            });
+        };
+
+        JMap.prototype.transformUser = function(sMailUser) {
+            // remove .local Domain from user
+            // return sMailUser.replace(/\.local$/, "");
+            return sMailUser;
+        }
+
+        JMap.prototype.clearSettings = function() {
+            window.localStorage.removeItem("JMap");
+        };
+
+        /**
+         * Test for Chrome Web Inspector:
+         * const jMap = sap.ui.getCore().getComponent("root-manager")
+         *  .getModel("JMap"); jMap.sendMail("test@example.org", "Hallo Manuel",
+         *  "Was soll ich sagen, das ist eine Email"); 
+         */
+        JMap.prototype.sendMail = function(sTo, sSubject, sTextBody, sHtmlBody, aAttachmentBlobIds) {
+            return new Promise((fnResolve) => {
+                Promise.all([this.loggedIn(), this.outboxFound()]).then(() => {
+
+                    const sUuid = this.uuidv4();
+
+                    const aSetMessagesRequests = ["setMessages", {
+                        "create": {}
+                    }, "#3"];
+
+                    const oEmail = {
+                        "mailboxIds": [this._oOutboxId],
+                        "from": { "email": this.transformUser(this.sUsername) },
+                        "to": [{ "email": sTo }],
+                        "subject": sSubject
+                    };
+                    if (sTextBody) {
+                        oEmail.textBody = sTextBody;
+                    }
+                    if (sHtmlBody) {
+                        oEmail.htmlBody = sHtmlBody;
+                    }
+                    if (aAttachmentBlobIds && aAttachmentBlobIds.length > 0) {
+                        oEmail.attachments = aAttachmentBlobIds;
+                    }
+
+                    aSetMessagesRequests[1].create[sUuid] = oEmail;
+
+
+                    const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
+                    this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
+                    fetch(sApiUrl, {
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json; charset=UTF-8",
+                            "Accept": "application/json",
+                            "Authorization": this._oSessionInfo.accessToken
+                        },
+                        "body": JSON.stringify([aSetMessagesRequests])
+                    }).then((oResponse) => {
+                        return oResponse.json();
+                    }).then((oMessagesResponse) => {
+                        console.log(oMessagesResponse);
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                    }).catch((oError) => {
+                        this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
+                        Log.error(oError);
+                        this.fireRequestFailed(oError);
+                        MessageBox.error("Could not receive Messages from " + sApiUrl + " " + oError);
+                    });
+                });
+            });
+        };
+
+        JMap.prototype.uploadBlob = function(aByteBuffer) {
+            return this.loggedIn().then(() => {
+                const sUploadUrl = this.sBaseUrl + this._oSessionInfo.upload;
+                return fetch(sUploadUrl, {
+                    "headers": {
+                        "Authorization": this._oSessionInfo.accessToken
+                    }
+                });
+            });
+        }
+
+        /**
+         * Create a UUID. Code taken from: https://stackoverflow.com/a/2117523/1059979
+         */
+        JMap.prototype.uuidv4 = function() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
             });
         };
 

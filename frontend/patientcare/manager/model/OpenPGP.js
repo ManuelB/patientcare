@@ -13,7 +13,7 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 this.setData({
                     "name": "",
                     "email": "",
-                    "passphrase": "",
+                    "passphrase": "changeit",
                     "OpenPGPKeyPair": { "publicKeyArmored": "", "privateKeyArmored": "", "revocationCertificate": "" }
                 });
                 // The OpenPGP class should only initialized once 
@@ -21,11 +21,12 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 this.pInitWorker = openpgp.initWorker({ path: sap.ui.require.toUrl("patientcare/thirdparty") + '/openpgp.worker.js' });
 
                 this.pInitWorker.then(() => {
-                    if (window.localStorage.getItem("OpenPGP") === null) {
-                        this.requestKeyPair(() => this.loadKeyPair());
-                    } else {
+                    if (window.localStorage.getItem("OpenPGP") !== null) {
                         this.loadKeyPair();
                     }
+                    /* else {
+                                            this.requestKeyPair(() => this.loadKeyPair());
+                                        }*/
                 });
             },
             "requestKeyPair": function(fnCallback) {
@@ -39,26 +40,56 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 });
             },
             "onNewKey": function() {
-                openpgp.generateKey({
-                    userIds: [this.getData()], // you can pass multiple user IDs
-                    rsaBits: 4096, // ECC curve name
-                    passphrase: this.getProperty("/passphrase") // protects the private key
-                }).then((oRsaKey) => {
-                    this.setProperty("/OpenPGPKeyPair/publicKeyArmored", oRsaKey.publicKeyArmored);
-                    this.setProperty("/OpenPGPKeyPair/privateKeyArmored", oRsaKey.privateKeyArmored);
-                    this.setProperty("/OpenPGPKeyPair/revocationCertificate", oRsaKey.revocationCertificate);
+                return new Promise((fnResolve) => {
+                    openpgp.generateKey({
+                        userIds: [{ "name": "" }], // you can pass multiple user IDs
+                        rsaBits: 4096
+                            /*, // RSA bits
+                                                    passphrase: this.getProperty("/passphrase") // protects the private key */
+                    }).then((oRsaKeyWithoutEmail) => {
 
-                    let oHkp = new openpgp.HKP('https://keys.openpgp.org');
+                        this.addUserEmailFromPublicFingerprint(oRsaKeyWithoutEmail).then((oRsaKey) => {
+                            this.setProperty("/OpenPGPKeyPair/publicKeyArmored", oRsaKey.publicKeyArmored);
+                            this.setProperty("/OpenPGPKeyPair/privateKeyArmored", oRsaKey.privateKeyArmored);
+                            this.setProperty("/OpenPGPKeyPair/revocationCertificate", oRsaKey.revocationCertificate);
+                            // let oHkp = new openpgp.HKP('https://keys.openpgp.org');
 
-                    //oHkp.upload(oRsaKey.publicKeyArmored).then(() => {
-                    //    this.oDialog.close();
-                    //});
-                    this.oDialog.close();
+                            //oHkp.upload(oRsaKey.publicKeyArmored).then(() => {
+                            //    this.oDialog.close();
+                            //});
+                            if (this.oDialog) {
+                                this.oDialog.close();
+                            }
+                            this.getSHA256HexStringHashFromPrivateKey(oRsaKey.key).then((sSha256PrivateKeyHex) => {
+                                this.setProperty("/sha256PrivateKeyHex", sSha256PrivateKeyHex);
+                                this.onSave();
+                                fnResolve({ "email": oRsaKey.key.users[0].userId.email, "sha256PrivateKeyHex": sSha256PrivateKeyHex });
+                            });
+                        });
 
+
+                    });
                 });
             },
+            "addUserEmailFromPublicFingerprint": function(oRsaKey) {
+                const sFingerprint = oRsaKey.key.primaryKey.getFingerprint();
+                const sMail = sFingerprint + "@" + window.location.hostname + (window.location.hostname.match("\\.") ? "" : ".local");
+                this.setProperty("/email", sMail);
+                return openpgp.reformatKey({
+                    "privateKey": oRsaKey.key,
+                    "userIds": [{ "name": "", "email": sMail }]
+                        /*,
+                                            "passphrase": this.getProperty("/passphrase")*/
+                });
+            },
+            "getSHA256HexStringHashFromPrivateKey": function(oPrivateKey) {
+                return openpgp.crypto.hash.sha256(oPrivateKey.primaryKey.keyMaterial)
+                    .then((aHashedPrivateKey) => openpgp.util.Uint8Array_to_hex(aHashedPrivateKey));
+            },
             "onSave": function() {
-                this.oDialog.close();
+                if (this.oDialog) {
+                    this.oDialog.close();
+                }
                 window.localStorage.setItem("OpenPGP", JSON.stringify(this.getData()));
             },
             "loadKeyPair": function() {
@@ -98,6 +129,9 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 openpgp.destroyWorker().then(() => {
                     JSONModel.prototype.destroy.apply(this, arguments);
                 });
+            },
+            clearSettings: function() {
+                window.localStorage.removeItem("OpenPGP");
             }
         });
         return OpenPGP;
