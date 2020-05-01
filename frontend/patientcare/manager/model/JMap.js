@@ -325,7 +325,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
          *  "Was soll ich sagen, das ist eine Email"); 
          */
         JMap.prototype.sendMail = function(sTo, sSubject, sTextBody, sHtmlBody, aAttachmentBlobIds) {
-            return new Promise((fnResolve) => {
+            return new Promise((fnResolve, fnReject) => {
                 Promise.all([this.loggedIn(), this.outboxFound()]).then(() => {
 
                     const sUuid = this.uuidv4();
@@ -367,25 +367,28 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                         return oResponse.json();
                     }).then((oMessagesResponse) => {
                         console.log(oMessagesResponse);
+                        fnResolve();
                         this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                     }).catch((oError) => {
                         this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                         Log.error(oError);
                         this.fireRequestFailed(oError);
+                        fnReject(oError);
                         MessageBox.error("Could not receive Messages from " + sApiUrl + " " + oError);
                     });
                 });
             });
         };
 
-        JMap.prototype.uploadBlob = function(aByteBuffer) {
+        JMap.prototype.uploadBlob = function(aByteBuffer, sMimeType) {
             return this.loggedIn().then(() => {
                 const sUploadUrl = this.sBaseUrl + this._oSessionInfo.upload;
                 return fetch(sUploadUrl, {
                     "headers": {
-                        "Authorization": this._oSessionInfo.accessToken
+                        "Authorization": this._oSessionInfo.accessToken,
+                        "Content-Type": sMimeType ? sMimeType : "application/octet-stream"
                     }
-                });
+                }).then((oResponse) => oResponse.text());
             });
         }
 

@@ -31,7 +31,17 @@ sap.ui.define(["sap/m/MessageBox"],
         };
 
         Onboarding.prototype.sendPublicKeySubmissionMail = function() {
-
+            return new Promise((fnResolve) => {
+                this.oOpenPGPModel.receiveSubmissionAddress().then((sSubmissionAddress) => {
+                    this.oOpenPGPModel.encryptPublicKeyForSubmission(sSubmissionAddress).then((oEncrypted) => {
+                        this.oJMapModel.uploadBlob(oEncrypted.data, "application/pgp-encrypted").then((sBlobId) => {
+                            this.oJMapModel.sendMail(sSubmissionAddress, "Key publishing request", "", undefined, [sBlobId]).then(() => {
+                                fnResolve();
+                            });
+                        });
+                    });
+                });
+            })
         };
 
         return Onboarding;

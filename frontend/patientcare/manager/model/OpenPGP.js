@@ -132,6 +132,32 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
             },
             clearSettings: function() {
                 window.localStorage.removeItem("OpenPGP");
+            },
+            encryptPublicKeyForSubmission: function(sSubmissionAddress) {
+                const sPublicKeyArmored = this.getProperty("/OpenPGPKeyPair/publicKeyArmored");
+                return this.encryptUsingWKDKey(sSubmissionAddress, sPublicKeyArmored);
+            },
+            encryptUsingWKDKey: function(sEmail, sString) {
+                return new openpgp.WKD().lookup({
+                    email: sEmail
+                }).then((mKeys) => {
+                    const oKeys = mKeys.keys;
+                    return openpgp.encrypt({
+                        message: openpgp.message.fromText(sString), // input as Message object
+                        publicKeys: mKeys.keys, // for encryption                                         // for signing (optional)
+                    });
+                });
+            },
+            receiveSubmissionAddress: function() {
+                const matches = /(.*)@(.*)/.exec(this.getProperty("/email"));
+                const domain = matches[2];
+
+                const url = `https://${domain}/.well-known/openpgpkey/submission-address`;
+                return fetch(url).then(function(response) {
+                    if (response.status === 200) {
+                        return response.text();
+                    }
+                });
             }
         });
         return OpenPGP;

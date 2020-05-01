@@ -17,7 +17,7 @@ sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/f/
                 // create the views based on the url/hash
                 this.getRouter().initialize();
 
-                new Onboarding(this);
+                this.oOnboarding = new Onboarding(this);
             },
 
             /**

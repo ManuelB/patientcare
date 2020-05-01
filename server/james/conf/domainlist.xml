@@ -57,9 +57,11 @@
 <!-- XML based implementation for DomainList -->
 <domainlist class="org.apache.james.domainlist.xml.XMLDomainList">
    <domainnames>
+       <domainname>localhost</domainname>
        <domainname>localhost.local</domainname>
+       <domainname>manuel-XPS-13-9360</domainname>
    </domainnames>
    <autodetect>true</autodetect>
    <autodetectIP>true</autodetectIP>
-   <defaultDomain>manuel-XPS-13-9360</defaultDomain>
+   <defaultDomain>localhost.local</defaultDomain>
 </domainlist>
