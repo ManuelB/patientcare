@@ -138,8 +138,18 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 return this.encryptUsingWKDKey(sSubmissionAddress, sPublicKeyArmored);
             },
             encryptUsingWKDKey: function(sEmail, sString) {
+                if (sEmail.match(/localhost\.local$/)) {
+                    let fnIsEmailAddress = openpgp.util.isEmailAddress;
+                    openpgp.util.isEmailAddress = function(data) {
+                        if (data.match(/.*@localhost/)) {
+                            return true;
+                        } else {
+                            return fnIsEmailAddress(data);
+                        }
+                    };
+                }
                 return new openpgp.WKD().lookup({
-                    email: sEmail
+                    email: sEmail.replace(/localhost\.local$/, "localhost")
                 }).then((mKeys) => {
                     const oKeys = mKeys.keys;
                     return openpgp.encrypt({
@@ -150,7 +160,11 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
             },
             receiveSubmissionAddress: function() {
                 const matches = /(.*)@(.*)/.exec(this.getProperty("/email"));
-                const domain = matches[2];
+                let domain = matches[2];
+
+                if (domain === "localhost.local") {
+                    domain = "localhost";
+                }
 
                 const url = `https://${domain}/.well-known/openpgpkey/submission-address`;
                 return fetch(url).then(function(response) {

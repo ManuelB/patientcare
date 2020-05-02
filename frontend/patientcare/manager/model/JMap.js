@@ -380,15 +380,18 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
             });
         };
 
-        JMap.prototype.uploadBlob = function(aByteBuffer, sMimeType) {
+        JMap.prototype.uploadBlob = function(oData, sMimeType) {
             return this.loggedIn().then(() => {
                 const sUploadUrl = this.sBaseUrl + this._oSessionInfo.upload;
                 return fetch(sUploadUrl, {
+                    "method": "POST",
                     "headers": {
                         "Authorization": this._oSessionInfo.accessToken,
                         "Content-Type": sMimeType ? sMimeType : "application/octet-stream"
-                    }
-                }).then((oResponse) => oResponse.text());
+                    },
+                    "body": oData
+                        // Example: {"accountId":{"present":false},"blobId":"kigkbsrrfefilfudjcdy","type":"application/pgp-encrypted","size":0,"expires":{"present":false}}
+                }).then((oResponse) => oResponse.json());
             });
         }
 

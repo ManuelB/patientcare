@@ -217,10 +217,15 @@
 				<consume>false</consume>
 			</mailet>
 			
-			<mailet match="org.apache.james.mailetcontainer.impl.matchers.And" class="org.apache.james.wkd.mailet.WebKeyDirectoryMailet">
-            	<matcher match="SMTPAuthSuccessful"/>
-            	<matcher match="RecipientIsLocal" />
-            	<matcher match="ReceiverIsRegex=submission-address@.*" />
+			<matcher name="key-submission-request" match="org.apache.james.mailetcontainer.impl.matchers.And">
+            	<matcher name="authenticated" match="org.apache.james.mailetcontainer.impl.matchers.Or">
+            		<matcher match="SMTPAuthSuccessful" />
+            		<matcher match="org.apache.james.jmap.mailet.SentByJmap"/>
+            	</matcher>
+            	<matcher match="HostIsLocal" />
+            	<matcher match="RecipientIsRegex=submission-address@.*" />
+			</matcher>
+			<mailet match="key-submission-request" class="org.apache.james.wkd.mailet.WebKeyDirectoryMailet">
             </mailet>
 
 			<!-- Is the recipient is for a local account, deliver it locally -->

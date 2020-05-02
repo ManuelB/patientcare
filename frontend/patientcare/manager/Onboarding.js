@@ -34,8 +34,8 @@ sap.ui.define(["sap/m/MessageBox"],
             return new Promise((fnResolve) => {
                 this.oOpenPGPModel.receiveSubmissionAddress().then((sSubmissionAddress) => {
                     this.oOpenPGPModel.encryptPublicKeyForSubmission(sSubmissionAddress).then((oEncrypted) => {
-                        this.oJMapModel.uploadBlob(oEncrypted.data, "application/pgp-encrypted").then((sBlobId) => {
-                            this.oJMapModel.sendMail(sSubmissionAddress, "Key publishing request", "", undefined, [sBlobId]).then(() => {
+                        this.oJMapModel.uploadBlob(oEncrypted.data, "application/pgp-encrypted").then((oBlobResponse) => {
+                            this.oJMapModel.sendMail(sSubmissionAddress, "Key publishing request", "", undefined, [{ "blobId": oBlobResponse.blobId, "type": oBlobResponse.type, "size": oBlobResponse.size }]).then(() => {
                                 fnResolve();
                             });
                         });
