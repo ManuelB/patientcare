@@ -8,13 +8,13 @@ class EmailSenderMainTest {
 
 	@Test
 	void testCeckAndCreateUser() {
-		EmailSenderMain.checkAndCreateUser("manuel-XPS-13-9360", "pat1");
+		EmailSenderMain.checkAndCreateUser("manuel-XPS-13-9360", "example");
 	}
 
 	@Test
 	void testSendEmail() {
 		EmailSenderMain.sendEmail(
-				EmailSenderMain.createMailSession("manuel-XPS-13-9360", "", ""), "manuel-XPS-13-9360", "pat1", Json.createObjectBuilder().build());
+				EmailSenderMain.createMailSession("manuel-XPS-13-9360", "", ""), "manuel-XPS-13-9360", "example", Json.createObjectBuilder().build());
 	}
 
 }
