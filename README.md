@@ -5,3 +5,4 @@ This contains a project that connects a James Email (https://james.apache.org) s
 
 ![Overviews](/screenshots/Overview-1.png?raw=true "")
 ![Details](/screenshots/DetailObservation-1.png?raw=true "")
+![COVID-19](/screenshots/Inbox-COVID-19.png?raw=true "")
