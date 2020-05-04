@@ -1,0 +1,36 @@
+<core:FragmentDefinition
+   xmlns="sap.m"
+   xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+        <VBox class="sapUiSmallMargin">
+            <f:SimpleForm
+                editable="false"
+                layout="ResponsiveGridLayout"
+                title="HL7 Data"
+                labelSpanXL="3"
+                labelSpanL="3"
+                labelSpanM="3"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="4"
+                emptySpanL="4"
+                emptySpanM="4"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false" >
+                <f:content>
+                    <Label text="Resource Type" />
+                    <Text text="{/resourceType}" />
+                    <Label text="Id" />
+                    <Text text="{/id}" />
+                    <Label text="Subject" />
+                    <Link text="{/subject/reference}" />
+                    <Label text="Value String" visible="{= ${/valueString} !== undefined}" />
+                    <Text text="{/valueString}" visible="{= ${/valueString} !== undefined}"/>
+                    <Label text="Value Quantity" visible="{= ${/valueQuantity} !== undefined}" />
+                    <ObjectNumber number="{/valueQuantity/value}" unit="{/valueQuantity/unit}" visible="{= ${/valueQuantity} !== undefined}"/>
+                </f:content>
+            </f:SimpleForm>
+        </VBox>
+</core:FragmentDefinition>
