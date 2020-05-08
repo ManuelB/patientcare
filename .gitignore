@@ -177,3 +177,4 @@ server/james/var/
 var/
 server/.vscode/settings.json
 server/james/write.lock
+server/james/web-key-directory

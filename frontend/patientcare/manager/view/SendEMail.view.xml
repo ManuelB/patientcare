@@ -1,0 +1,108 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns:layout="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
+    xmlns="sap.m"
+    xmlns:rte="incentergy.base.rte"
+	controllerName="patientcare.manager.view.SendEMail"
+    height="100%">
+    <Dialog id="dialog" contentWidth="60rem" stretchOnPhone="true" showHeader="false" draggable="true">
+        <f:SimpleForm
+        editable="true"
+        layout="ResponsiveGridLayout" labelSpanXL="12"
+        labelSpanL="12" labelSpanM="12" labelSpanS="12"
+        adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0"
+        emptySpanS="0" columnsXL="1" columnsL="1" columnsM="1"
+        singleContainerFullSize="false"
+        title="Send Email">
+        <Label text="To" />
+        <Input id="to" value="{/to/0/email}" type="Email" />
+        <Label text="CC" />
+        <Input id="cc" value="{/cc/0/email}" type="Email" />
+        <Label text="BCC" />
+        <Input id="bcc" value="{/bcc/0/email}" type="Email" />
+        <Label text="Subject" />
+        <Input id="subject" value="{/subject}" />
+        </f:SimpleForm>
+        <rte:RichTextEditor id="richTextEditor" content="{/htmlBody}" height="25rem" width="100%" />
+        <UploadCollection
+				id="UploadCollection"
+				maximumFilenameLength="{settings>/maximumFilenameLength}"
+				maximumFileSize="{settings>/maximumFileSize}"
+				multiple="true"
+				change="onChange"
+				fileDeleted="onFileDeleted"
+				filenameLengthExceed="onFilenameLengthExceed"
+				fileRenamed="onFileRenamed"
+				fileSizeExceed="onFileSizeExceed"
+				fileType="{fileTypes>/selected}"
+				selectionChange="onSelectionChange"
+				typeMissmatch="onTypeMissmatch"
+				uploadComplete="onUploadComplete"
+				beforeUploadStarts="onBeforeUploadStarts"
+				uploadTerminated="onUploadTerminated"
+				items="{
+					path: '/items',
+					templateShareable: false
+				}"
+				numberOfAttachmentsText="Uploaded (8)"
+				showSeparators="{settings>/showSeparators}"
+				uploadEnabled="{settings>/uploadEnabled}"
+				uploadButtonInvisible="{=!${settings>/uploadButtonVisible}}"
+				mode="{settings>/mode}">
+				<toolbar>
+					<OverflowToolbar id="myId">
+						<Title id="attachmentTitle" />
+						<ToolbarSpacer />
+						<SearchField width="10rem" search="onSearch" />
+						<Button
+							id="deleteSelectedButton"
+							text="Delete"
+							press="onDeleteSelectedItems"
+							enabled="false"
+							visible="false"
+							type="Transparent" />
+						<ToggleButton
+							id="selectAllButton"
+							text="Select all"
+							press="onSelectAllPress"
+							enabled="false"
+							visible="false"
+							type="Transparent" />
+						<UploadCollectionToolbarPlaceholder />
+					</OverflowToolbar>
+				</toolbar>
+				<items>
+					<UploadCollectionItem
+						documentId="{documentId}"
+						fileName="{fileName}"
+						mimeType="{mimeType}"
+						thumbnailUrl="{thumbnailUrl}"
+						url="{url}"
+						enableEdit="{settings>/enableEdit}"
+						enableDelete="{settings>/enableDelete}"
+						visibleDelete="{settings>/visibleDelete}"
+						visibleEdit="{settings>/visibleEdit}"
+						attributes="{path : 'attributes', templateShareable : false}"
+						statuses="{path : 'statuses', templateShareable : false}"
+						markers="{path : 'markers', factory: '.createObjectMarker'}"
+						selected="{selected}">
+						<attributes>
+							<ObjectAttribute title="{title}"
+								text="{path : 'text', formatter : '.formatAttribute'}"
+								active="{active}"
+								press="onAttributePress" />
+						</attributes>
+						<statuses>
+							<ObjectStatus title="{title}"
+								text="{text}"
+								state="{state}" />
+						</statuses>
+					</UploadCollectionItem>
+				</items>
+            </UploadCollection>
+            <buttons>
+                <Button text="Cancel" type="Reject" press="onReject" />
+                <Button text="Send Email" type="Accept" press="onSend" />
+            </buttons>
+    </Dialog>
+</mvc:View>

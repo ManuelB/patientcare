@@ -82,6 +82,10 @@
                         "EMail",
                         "Attachment"
                     ]
+                },
+                {
+                    "pattern": "SendEMail",
+                    "name": "SendEMail"
                 }
             ],
             "targets": {

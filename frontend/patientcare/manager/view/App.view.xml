@@ -42,6 +42,12 @@
                                     path : 'id' 
                                  }]
                                 }" growing="true" growingScrollToLoad="true" id="email">
+                                    <headerToolbar>
+                                        <OverflowToolbar id="otbSubheader">
+                                            <ToolbarSpacer/>
+                                            <Button text="Create EMail" type="Transparent" press="onCreateEmail"/>
+                                        </OverflowToolbar>
+                                    </headerToolbar>
                                     <ObjectListItem
                                         title="{JMap>subject}"
                                         type="Active"

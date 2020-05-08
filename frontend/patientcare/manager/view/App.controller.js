@@ -1,6 +1,6 @@
 sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f/FlexibleColumnLayout",
-    "sap/ui/model/Filter", "sap/ui/model/FilterOperator"
-], function(Controller, ResizeHandler, FlexibleColumnLayout, Filter, FilterOperator) {
+    "sap/ui/model/Filter", "sap/ui/model/FilterOperator", "sap/ui/core/mvc/View"
+], function(Controller, ResizeHandler, FlexibleColumnLayout, Filter, FilterOperator, View) {
     "use strict";
 
     return Controller.extend("patientcare.manager.view.App", {
@@ -22,26 +22,44 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
             var sRouteName = oEvent.getParameter("name"),
                 oArguments = oEvent.getParameter("arguments");
 
-            var oModel = this.getOwnerComponent().getModel("Layout");
+            if (sRouteName == "SendEMail") {
+                if (!this._oSendDialogView) {
+                    this.getOwnerComponent().runAsOwner(() => {
+                        View.create({
+                            "viewName": "patientcare.manager.view.SendEMail",
+                            "type": "XML"
+                        }).then((oView) => {
+                            this.getView().addDependent(oView);
+                            this._oSendDialogView = oView;
+                            this._oSendDialogView.getContent()[0].open();
+                        });
+                    });
+                } else {
+                    this._oSendDialogView.getContent()[0].open();
+                }
+            } else {
+                var oModel = this.getOwnerComponent().getModel("Layout");
 
-            var sLayout = oEvent.getParameters().arguments.layout;
+                var sLayout = oEvent.getParameters().arguments.layout;
 
-            // If there is no layout parameter, query for the default level 0 layout (normally OneColumn)
-            if (!sLayout) {
-                var oNextUIState = this.getOwnerComponent().getHelper().getNextUIState(0);
-                sLayout = oNextUIState.layout;
+                // If there is no layout parameter, query for the default level 0 layout (normally OneColumn)
+                if (!sLayout) {
+                    var oNextUIState = this.getOwnerComponent().getHelper().getNextUIState(0);
+                    sLayout = oNextUIState.layout;
+                }
+
+                // Update the layout of the FlexibleColumnLayout
+                if (sLayout) {
+                    oModel.setProperty("/layout", sLayout);
+                }
+
+                this._updateUIElements();
+
+                // Save the current route name
+                this.currentRouteName = sRouteName;
+                this.currentEntity = oArguments["EMailId"];
             }
 
-            // Update the layout of the FlexibleColumnLayout
-            if (sLayout) {
-                oModel.setProperty("/layout", sLayout);
-            }
-
-            this._updateUIElements();
-
-            // Save the current route name
-            this.currentRouteName = sRouteName;
-            this.currentEntity = oArguments["EMailId"];
         },
         onStateChanged: function(oEvent) {
             var bIsNavigationArrow = oEvent.getParameter("isNavigationArrow"),
@@ -102,7 +120,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
             var oParams = { layout: oNextUIState.layout };
             oParams["EMailId"] = sEmailId;
             this.oRouter.navTo("EMail", oParams);
+        },
+        onCreateEmail: function(oEvent) {
+            this.oRouter.navTo("SendEMail");
         }
-
     });
 });

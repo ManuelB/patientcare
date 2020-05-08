@@ -327,31 +327,34 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
         JMap.prototype.sendMail = function(sTo, sSubject, sTextBody, sHtmlBody, aAttachmentBlobIds) {
             return new Promise((fnResolve, fnReject) => {
                 Promise.all([this.loggedIn(), this.outboxFound()]).then(() => {
-
+                    let oEmail;
                     const sUuid = this.uuidv4();
 
                     const aSetMessagesRequests = ["setMessages", {
                         "create": {}
                     }, "#3"];
+                    if (typeof sTo === "object") {
+                        oEmail = sTo;
+                    } else {
+                        oEmail = {
+                            "to": [{ "email": sTo }],
+                            "subject": sSubject
+                        };
+                        if (sTextBody) {
+                            oEmail.textBody = sTextBody;
+                        }
+                        if (sHtmlBody) {
+                            oEmail.htmlBody = sHtmlBody;
+                        }
+                        if (aAttachmentBlobIds && aAttachmentBlobIds.length > 0) {
+                            oEmail.attachments = aAttachmentBlobIds;
+                        }
 
-                    const oEmail = {
-                        "mailboxIds": [this._oOutboxId],
-                        "from": { "email": this.transformUser(this.sUsername) },
-                        "to": [{ "email": sTo }],
-                        "subject": sSubject
-                    };
-                    if (sTextBody) {
-                        oEmail.textBody = sTextBody;
                     }
-                    if (sHtmlBody) {
-                        oEmail.htmlBody = sHtmlBody;
-                    }
-                    if (aAttachmentBlobIds && aAttachmentBlobIds.length > 0) {
-                        oEmail.attachments = aAttachmentBlobIds;
-                    }
+                    oEmail["mailboxIds"] = [this._oOutboxId];
+                    oEmail["from"] = { "email": this.transformUser(this.sUsername) };
 
                     aSetMessagesRequests[1].create[sUuid] = oEmail;
-
 
                     const sApiUrl = this.sBaseUrl + this._oSessionInfo.api;
                     this.fireRequestSent({ url: sApiUrl, type: "POST", async: true });
@@ -366,8 +369,13 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                     }).then((oResponse) => {
                         return oResponse.json();
                     }).then((oMessagesResponse) => {
-                        console.log(oMessagesResponse);
-                        fnResolve();
+                        if (oMessagesResponse[0][0] == "error") {
+                            fnReject(oMessagesResponse[0][1]);
+                        } else if (sUuid in oMessagesResponse[0][1]["notCreated"]) {
+                            fnReject(oMessagesResponse[0][1]["notCreated"][sUuid].description);
+                        } else {
+                            fnResolve();
+                        }
                         this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
                     }).catch((oError) => {
                         this.fireRequestCompleted({ url: sApiUrl, type: "POST", async: true });
