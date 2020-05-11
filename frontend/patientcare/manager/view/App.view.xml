@@ -1,80 +1,83 @@
 <View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:f="sap.f" xmlns:tnt="sap.tnt" displayBlock="true" controllerName="patientcare.manager.view.App" height="100%">
-		<tnt:ToolPage id="toolPage">
-			<tnt:header>
-				<f:ShellBar id="shellBar" class="sapUiNoContentPadding" title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
-                    <f:profile>
-                        <f:Avatar initials="UI"/>
-                    </f:profile>
-                    <f:searchManager>
-                        <f:SearchManager liveChange="onSearch" />
-                    </f:searchManager>
-                </f:ShellBar>
-			</tnt:header>
-            <tnt:sideContent>
-                <tnt:SideNavigation id="sideNavigation" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
-                    <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
-                        <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages}/{JMap>totalMessages})" key="{key}">
-                        </tnt:NavigationListItem>
+    <tnt:ToolPage id="toolPage">
+        <tnt:header>
+            <f:ShellBar id="shellBar" class="sapUiNoContentPadding" title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
+                <f:profile>
+                    <f:Avatar initials="UI" press="onProfile"/>
+                </f:profile>
+                <f:searchManager>
+                    <f:SearchManager liveChange="onSearch" />
+                </f:searchManager>
+            </f:ShellBar>
+        </tnt:header>
+        <tnt:sideContent>
+            <tnt:SideNavigation id="sideNavigation" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
+                <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
+                    <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages}/{JMap>totalMessages})" key="{key}">
+                    </tnt:NavigationListItem>
+                </tnt:NavigationList>
+                <tnt:fixedItem>
+                    <tnt:NavigationList items="{path: '/fixedNavigation'}">
+                        <tnt:NavigationListItem text="{title}" icon="{icon}" />
                     </tnt:NavigationList>
-                    <tnt:fixedItem>
-                        <tnt:NavigationList items="{path: '/fixedNavigation'}">
-                            <tnt:NavigationListItem text="{title}" icon="{icon}" />
-                        </tnt:NavigationList>
-                    </tnt:fixedItem>
-                </tnt:SideNavigation>
-            </tnt:sideContent>
-            <tnt:mainContents>
-                <f:FlexibleColumnLayout id="fcl" stateChange="onStateChanged"	layout="{Layout>/layout}" backgroundDesign="Solid">
-                    <f:beginColumnPages>
-                        <f:DynamicPage>
-                            <f:title>
-                                <f:DynamicPageTitle>
-                                    <f:heading>
-                                        <Title text="E-Mails" />
-                                    </f:heading>
-                                </f:DynamicPageTitle>
-                            </f:title>
-                            <f:content>
-                                <List showUnread="true" items="{path: 'JMap>/EMails', sorter : [{
-                                    path : 'date',
-                                    descending: true
-                                 },{
-                                    path : 'id' 
-                                 }]
-                                }" growing="true" growingScrollToLoad="true" id="email">
-                                    <headerToolbar>
-                                        <OverflowToolbar id="otbSubheader">
-                                            <ToolbarSpacer/>
-                                            <Button text="Create EMail" type="Transparent" press="onCreateEmail"/>
-                                        </OverflowToolbar>
-                                    </headerToolbar>
-                                    <ObjectListItem
-                                        title="{JMap>subject}"
-                                        type="Active"
-                                        unread="true"
-                                        press="onEMailPress">
-                                        <firstStatus>
-                                            <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
-                                        </firstStatus>
-                                        <ObjectAttribute text="{
-                                            path: 'JMap>date',
-                                            type: 'sap.ui.model.type.DateTime',
-                                            formatOptions: {
-                                                source : {
-                                                    pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
-                                                }
+                </tnt:fixedItem>
+            </tnt:SideNavigation>
+        </tnt:sideContent>
+        <tnt:mainContents>
+            <f:FlexibleColumnLayout id="fcl" stateChange="onStateChanged"	layout="{Layout>/layout}" backgroundDesign="Solid">
+                <f:beginColumnPages>
+                    <f:DynamicPage>
+                        <f:title>
+                            <f:DynamicPageTitle>
+                                <f:heading>
+                                    <Title text="E-Mails" />
+                                </f:heading>
+                            </f:DynamicPageTitle>
+                        </f:title>
+                        <f:content>
+                            <List showUnread="true" items="{path: 'JMap>/EMails', sorter : [{
+                                path : 'date',
+                                descending: true
+                                },{
+                                path : 'id' 
+                                }]
+                            }" growing="true" growingScrollToLoad="true" id="email">
+                                <headerToolbar>
+                                    <OverflowToolbar id="otbSubheader">
+                                        <ToolbarSpacer/>
+                                        <Button text="Create EMail" type="Transparent" press="onCreateEmail"/>
+                                    </OverflowToolbar>
+                                </headerToolbar>
+                                <ObjectListItem
+                                    title="{JMap>subject}"
+                                    type="Active"
+                                    unread="true"
+                                    press="onEMailPress">
+                                    <firstStatus>
+                                        <ObjectStatus text="{JMap>from/name} &lt;{JMap>from/email}&gt;" />
+                                    </firstStatus>
+                                    <ObjectAttribute text="{
+                                        path: 'JMap>date',
+                                        type: 'sap.ui.model.type.DateTime',
+                                        formatOptions: {
+                                            source : {
+                                                pattern: 'yyyy-MM-ddTHH:mm:ssZ' 
                                             }
-                                        }" />
-                                    </ObjectListItem>
-                                </List>
-                            </f:content>
-                        </f:DynamicPage>
-                    </f:beginColumnPages>
-                    <f:midColumnPages>
-                    </f:midColumnPages>
-                    <f:endColumnPages>
-                    </f:endColumnPages>
-                </f:FlexibleColumnLayout>
-            </tnt:mainContents>
-		</tnt:ToolPage>
+                                        }
+                                    }" />
+                                </ObjectListItem>
+                            </List>
+                        </f:content>
+                    </f:DynamicPage>
+                </f:beginColumnPages>
+                <f:midColumnPages>
+                </f:midColumnPages>
+                <f:endColumnPages>
+                </f:endColumnPages>
+            </f:FlexibleColumnLayout>
+        </tnt:mainContents>
+        <tnt:dependents>
+            <mvc:XMLView id="profile" viewName="patientcare.manager.view.Profile" />
+        </tnt:dependents>
+    </tnt:ToolPage>
 </View>

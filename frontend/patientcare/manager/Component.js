@@ -14,6 +14,8 @@ sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/f/
                 var oModel = new JSONModel();
                 this.setModel(oModel, "Layout");
 
+                this.setModel(this.getModel("JMap").getConfigModel(), "JMapConfig");
+
                 // create the views based on the url/hash
                 this.getRouter().initialize();
 

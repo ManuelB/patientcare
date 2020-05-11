@@ -1,0 +1,64 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+	xmlns:f="sap.ui.layout.form"
+    xmlns="sap.m"
+	controllerName="patientcare.manager.view.Profile"
+	height="100%">
+        <Dialog id="dialog" resizable="true" draggable="true" title="Profile" contentWidth="30rem">
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="3"
+                labelSpanM="4"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="0"
+                emptySpanL="4"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="2"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false"
+                ariaLabelledBy="Title1">
+                <Label text="Your email" />
+                <Input value="{OpenPGP>/email}" placeholder="e.g. john@example.com" />
+                <Label text="Your passphrase" />
+                <Input value="{OpenPGP>/passphrase}" placeholder="e.g. super long and hard to guess secret" />
+                <Label text="Public key armored" />
+                <TextArea value="{OpenPGP>/OpenPGPKeyPair/publicKeyArmored}" rows="7"></TextArea>
+                <Label text="Private key armored" />
+                <TextArea value="{OpenPGP>/OpenPGPKeyPair/privateKeyArmored}" rows="7"></TextArea>
+                <Label text="Revocation certificate" />
+                <TextArea value="{OpenPGP>/OpenPGPKeyPair/revocationCertificate}" rows="7"></TextArea>
+            </f:SimpleForm>
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="3"
+                labelSpanM="4"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="0"
+                emptySpanL="4"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="2"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false"
+                ariaLabelledBy="Title1">
+                <Label text="JMap URL" />
+                <Input value="{JMapConfig>/baseUrl}" placeholder="e.g. http://localhost/" />
+                <Label text="Your username" />
+                <Input value="{JMapConfig>/username}" placeholder="e.g. john@example.com" />
+                <Label text="Your password" />
+                <Input value="{JMapConfig>/password}" placeholder="e.g. asdloki343sfds" />
+            </f:SimpleForm>
+            <buttons>
+                <Button text="Save" press="onSave" />
+                <Button text="Close" press="onClose" />
+            </buttons>
+        </Dialog>
+</mvc:View>

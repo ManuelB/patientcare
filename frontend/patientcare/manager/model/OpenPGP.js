@@ -90,6 +90,9 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 if (this.oDialog) {
                     this.oDialog.close();
                 }
+                this.save();
+            },
+            "save": function() {
                 window.localStorage.setItem("OpenPGP", JSON.stringify(this.getData()));
             },
             "loadKeyPair": function() {

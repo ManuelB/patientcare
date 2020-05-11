@@ -123,6 +123,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
         },
         onCreateEmail: function(oEvent) {
             this.oRouter.navTo("SendEMail");
+        },
+        onProfile: function(oEvent) {
+            this.byId("profile").getContent()[0].open();
         }
     });
 });

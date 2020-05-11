@@ -1,10 +1,11 @@
 sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/Fragment", "sap/base/Log", "sap/m/MessageBox"],
-    function(JMapListBinding, JSONModel, Fragment, Log, MessageBox, ChangeReason) {
+    function(JMapListBinding, JSONModel, Fragment, Log, MessageBox) {
         "use strict";
 
         const JMap = JSONModel.extend("patientcare.manager.model.JMap", {
             "constructor": function() {
                 JSONModel.apply(this, arguments);
+                this.oConfigModel = new JSONModel();
                 this._oInboxId = null;
                 this._oOutboxId = null;
                 this.mMessageBoxId2TotalMessages = {};
@@ -28,7 +29,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                 name: "patientcare.manager.model.ConfigureJMap",
                 controller: this
             }).then((oDialog) => {
-                oDialog.setModel(new JSONModel());
+                oDialog.setModel(this.oConfigModel);
                 oDialog.open();
                 this.oDialog = oDialog;
             });
@@ -36,12 +37,17 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
 
         JMap.prototype.onSave = function() {
             this.oDialog.close();
-            window.localStorage.setItem("JMap", JSON.stringify(this.oDialog.getModel().getData()));
+            this.save();
             this.loadConfigAndInitModel();
+        };
+
+        JMap.prototype.save = function() {
+            window.localStorage.setItem("JMap", JSON.stringify(this.oConfigModel.getData()));
         };
 
         JMap.prototype.loadConfigAndInitModel = function() {
             let oData = JSON.parse(window.localStorage.getItem("JMap"));
+            this.oConfigModel.setData(oData);
             this.sBaseUrl = oData.baseUrl;
             this.sUsername = oData.username;
             this.sPassword = oData.password;
@@ -58,6 +64,10 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
 
         JMap.prototype.outboxFound = function() {
             return this._pOutboxFound;
+        };
+
+        JMap.prototype.getConfigModel = function() {
+            return this.oConfigModel;
         };
 
         JMap.prototype.initModel = function() {
