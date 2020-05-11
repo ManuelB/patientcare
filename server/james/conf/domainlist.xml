@@ -60,6 +60,7 @@
        <domainname>localhost</domainname>
        <domainname>localhost.local</domainname>
        <domainname>manuel-XPS-13-9360</domainname>
+       <domainname>patientcare.incentergy.de</domainname>
    </domainnames>
    <autodetect>true</autodetect>
    <autodetectIP>true</autodetectIP>
