@@ -292,7 +292,13 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
         };
 
         JMap.prototype.createMailAccount = function(sMail, sPassword) {
-            return fetch("http://" + window.location.hostname + ":8000/users/" + this.transformUser(sMail), {
+	    let sUrl;
+	    if(window.location.hostname === "localhost") {
+                sUrl = "http://localhpst:8000"
+	    } else {
+	        sUrl = window.location.protocol+"//"+window.location.host;
+	    }
+            return fetch(sUrl + "/users/" + this.transformUser(sMail), {
                 "method": "PUT",
                 "body": JSON.stringify({ "password": sPassword })
             }).then((oResponse) => {
