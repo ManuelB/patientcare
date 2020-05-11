@@ -303,7 +303,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
                 "body": JSON.stringify({ "password": sPassword })
             }).then((oResponse) => {
                 if (oResponse.status === 204) {
-                    window.localStorage.setItem("JMap", JSON.stringify({ "baseUrl": "http://" + window.location.hostname, "username": sMail, "password": sPassword }))
+                    window.localStorage.setItem("JMap", JSON.stringify({ "baseUrl": window.location.protocol + "//" + window.location.host, "username": sMail, "password": sPassword }))
                     this.loadConfigAndInitModel();
                 } else {
                     oResponse.text().then((sError) => {
