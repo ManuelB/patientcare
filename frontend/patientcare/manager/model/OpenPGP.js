@@ -43,9 +43,9 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 return new Promise((fnResolve) => {
                     openpgp.generateKey({
                         userIds: [{ "name": "" }], // you can pass multiple user IDs
-                        rsaBits: 4096
-                            /*, // RSA bits
-                                                    passphrase: this.getProperty("/passphrase") // protects the private key */
+                        rsaBits: 4096, // RSA bits
+                        // passphrase: this.getProperty("/passphrase") // protects the private key */
+                        subkeys: [{}, { sign: true }]
                     }).then((oRsaKeyWithoutEmail) => {
 
                         this.addUserEmailFromPublicFingerprint(oRsaKeyWithoutEmail).then((oRsaKey) => {
