@@ -45,7 +45,7 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                         userIds: [{ "name": "" }], // you can pass multiple user IDs
                         rsaBits: 4096, // RSA bits
                         keyExpirationTime: 60 * 60 * 24 * 365 * 10, // make key 10 years valid
-                        passphrase: this.getProperty("/passphrase"), // protects the private key */
+                        // passphrase: this.getProperty("/passphrase"), // protects the private key */
                         subkeys: [{}, { sign: true }]
                     }).then((oRsaKeyWithoutEmail) => {
 
@@ -79,8 +79,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 return openpgp.reformatKey({
                     "privateKey": oRsaKey.key,
                     "userIds": [{ "name": "", "email": sMail }],
-                    "keyExpirationTime": 60 * 60 * 24 * 365 * 10,
-                    "passphrase": this.getProperty("/passphrase")
+                    "keyExpirationTime": 60 * 60 * 24 * 365 * 10 //,
+                        // "passphrase": this.getProperty("/passphrase")
                 });
             },
             "getSHA256HexStringHashFromPrivateKey": function(oPrivateKey) {
@@ -114,17 +114,17 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
             "decrypt": function(oUint8Array) {
                 return new Promise((fnResolve) => {
                     openpgp.key.readArmored(this.getProperty("/OpenPGPKeyPair/privateKeyArmored")).then((oPrivateKey) => {
-                        oPrivateKey.keys[0].decrypt(this.getProperty("/passphrase")).then(() => {
-                            let pMessage = oUint8Array instanceof Uint8Array ? openpgp.message.read(oUint8Array) : openpgp.message.readArmored(oUint8Array);
-                            pMessage.then((oMessage) => {
-                                openpgp.decrypt({
-                                    message: oMessage,
-                                    privateKeys: oPrivateKey.keys // for decryption
-                                }).then((oData) => {
-                                    fnResolve(oData.data);
-                                });
+                        //oPrivateKey.keys[0].decrypt(this.getProperty("/passphrase")).then(() => {
+                        let pMessage = oUint8Array instanceof Uint8Array ? openpgp.message.read(oUint8Array) : openpgp.message.readArmored(oUint8Array);
+                        pMessage.then((oMessage) => {
+                            openpgp.decrypt({
+                                message: oMessage,
+                                privateKeys: oPrivateKey.keys // for decryption
+                            }).then((oData) => {
+                                fnResolve(oData.data);
                             });
                         });
+                        //});
                     });
                 });
             },
