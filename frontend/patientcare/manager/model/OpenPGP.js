@@ -45,7 +45,7 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                         userIds: [{ "name": "" }], // you can pass multiple user IDs
                         rsaBits: 4096, // RSA bits
                         keyExpirationTime: 60 * 60 * 24 * 365 * 10, // make key 10 years valid
-                        // passphrase: this.getProperty("/passphrase") // protects the private key */
+                        passphrase: this.getProperty("/passphrase"), // protects the private key */
                         subkeys: [{}, { sign: true }]
                     }).then((oRsaKeyWithoutEmail) => {
 
@@ -79,9 +79,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 return openpgp.reformatKey({
                     "privateKey": oRsaKey.key,
                     "userIds": [{ "name": "", "email": sMail }],
-                    "keyExpirationTime": 60 * 60 * 24 * 365 * 10
-                        /*,
-                                            "passphrase": this.getProperty("/passphrase")*/
+                    "keyExpirationTime": 60 * 60 * 24 * 365 * 10,
+                    "passphrase": this.getProperty("/passphrase")
                 });
             },
             "getSHA256HexStringHashFromPrivateKey": function(oPrivateKey) {
@@ -128,7 +127,6 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                         });
                     });
                 });
-
             },
             "destroy": function() {
                 openpgp.destroyWorker().then(() => {
