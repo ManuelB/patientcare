@@ -78,7 +78,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                 this.setProperty("/email", sMail);
                 return openpgp.reformatKey({
                     "privateKey": oRsaKey.key,
-                    "userIds": [{ "name": "", "email": sMail }]
+                    "userIds": [{ "name": "", "email": sMail }],
+                    "keyExpirationTime": 60 * 60 * 24 * 365 * 10
                         /*,
                                             "passphrase": this.getProperty("/passphrase")*/
                 });
