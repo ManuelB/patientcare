@@ -36,6 +36,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/base/Log", "sap/ui/model/json/
                         const oModel = new JSONModel();
                         oModel.setProperty("/blobUrl", URL.createObjectURL(new Blob([oData[1]], { type: oData[0] })));
                         this.getView().setModel(oModel);
+                    } else if (oData[0] === "application/octet-stream") {
+                        this.setAttachmentFragment(oData[0]);
+                        var aArmoredByteArray = new Uint8Array(oData[1]);
+                        var sArmoredString = String.fromCharCode.apply(String, aArmoredByteArray);
+                        this.getOwnerComponent().getModel("OpenPGP").decrypt(sArmoredString).then(oDecryptedData => {
+                            const oModel = new JSONModel();
+                            oModel.setData({ "text": oDecryptedData });
+                            this.getView().setModel(oModel);
+                        });
                     } else {
                         Log.warning("Unsupported mime type found: " + oData[0]);
                     }
