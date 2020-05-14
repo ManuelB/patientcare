@@ -3,7 +3,7 @@
     xmlns="sap.m"
 	controllerName="patientcare.manager.view.Profile"
 	height="100%">
-    <Dialog id="dialog" resizable="true" draggable="true" title="Profile" contentWidth="30rem" stretch="device>/system/phone">
+    <Dialog id="dialog" resizable="true" draggable="true" title="Profile" contentWidth="30rem" stretch="{device>/system/phone}">
             <f:SimpleForm
                 editable="true"
                 layout="ResponsiveGridLayout"
