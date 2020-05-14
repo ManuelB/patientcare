@@ -32,7 +32,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/m/MessageBox", "sap/ui/model/j
             onSend: function() {
 
                 const oEmail = this._oEmailModel.getData();
-                this.getView().getModel("OpenPGP").encryptUsingWKDKey(oEmail.htmlBody).then((oEncrypted) => {
+                this.getView().getModel("OpenPGP").encryptUsingWKDKey(oEmail.to[0].email, oEmail.htmlBody).then((oEncrypted) => {
                     this.getView().getModel("JMap").uploadBlob(oEncrypted.data, "application/octet-stream").then((oBlobResponse) => {
                         this.getView().getModel("JMap").sendMail(oEmail.to[0].email, oEmail.subject, "", undefined, [{ "blobId": oBlobResponse.blobId, "name": "encrypted.asc", "type": oBlobResponse.type, "size": oBlobResponse.size }]).then(() => {
                             MessageBox.success("Encrypted email successfully send", {
@@ -43,7 +43,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/m/MessageBox", "sap/ui/model/j
                             });;
                         });
                     });
-                }).catch(() =>
+                }).catch(() => {
                     this.getView().getModel("JMap").sendMail(oEmail)
                     .then(() => {
                         MessageBox.success("Email successfully send", {
