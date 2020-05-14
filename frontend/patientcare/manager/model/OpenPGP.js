@@ -159,6 +159,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "../../thirdparty/openpgp", "sap/u
                         message: openpgp.message.fromText(sString), // input as Message object
                         publicKeys: mKeys.keys, // for encryption                                         // for signing (optional)
                     });
+                }).catch(() => {
+                    return Promise.reject(sEmail);
                 });
             },
             receiveSubmissionAddress: function() {
