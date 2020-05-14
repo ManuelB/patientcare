@@ -1,5 +1,5 @@
-sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/f/FlexibleColumnLayoutSemanticHelper", "./Onboarding"],
-    function(UIComponent, JSONModel, FlexibleColumnLayoutSemanticHelper, Onboarding) {
+sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/f/FlexibleColumnLayoutSemanticHelper", "sap/ui/Device", "./Onboarding"],
+    function(UIComponent, JSONModel, FlexibleColumnLayoutSemanticHelper, Device, Onboarding) {
         "use strict";
         return UIComponent.extend("patientcare.manager.Component", {
 
@@ -11,8 +11,13 @@ sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/model/json/JSONModel", "sap/f/
                 // call the init function of the parent
                 UIComponent.prototype.init.apply(this, arguments);
 
-                var oModel = new JSONModel();
+                const oModel = new JSONModel();
                 this.setModel(oModel, "Layout");
+
+		// set device model
+		const oDeviceModel = new JSONModel(Device);
+		oDeviceModel.setDefaultBindingMode("OneWay");
+		this.setModel(oDeviceModel, "device");
 
                 this.setModel(this.getModel("JMap").getConfigModel(), "JMapConfig");
 
