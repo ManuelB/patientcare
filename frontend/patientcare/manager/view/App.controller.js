@@ -90,10 +90,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
             this.oRouter.detachRouteMatched(this.onRouteMatched, this);
         },
         onCollapseExpandPress: function() {
-            var oSideNavigation = this.byId("sideNavigation");
-            var bExpanded = oSideNavigation.getExpanded();
-
-            oSideNavigation.setExpanded(!bExpanded);
+            this.byId("toolPage").toggleSideContentMode();
         },
         onItemSelect: function(oEvent) {
             this._sSelectedMailbox = oEvent.getParameter("item").getBindingContext("JMap").getProperty("id");

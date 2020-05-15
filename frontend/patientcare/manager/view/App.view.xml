@@ -1,5 +1,5 @@
 <View xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:f="sap.f" xmlns:tnt="sap.tnt" displayBlock="true" controllerName="patientcare.manager.view.App" height="100%">
-	<tnt:ToolPage id="toolPage" sideExpanded="false">
+	<tnt:ToolPage id="toolPage" sideExpanded="true">
         <tnt:header>
             <f:ShellBar id="shellBar" class="sapUiNoContentPadding" title="Patient Care" secondTitle="Patient record and sharing app" homeIcon="https://ui5.sap.com/1.77.1/resources/sap/ui/documentation/sdk/images/logo_ui5.png" showMenuButton="true" menuButtonPressed="onCollapseExpandPress" showCopilot="false" showSearch="false" showNotifications="true" showProductSwitcher="false" notificationsNumber="0">
                 <f:profile>
