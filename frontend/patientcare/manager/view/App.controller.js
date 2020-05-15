@@ -126,6 +126,21 @@ sap.ui.define(["sap/ui/core/mvc/Controller", "sap/ui/core/ResizeHandler", "sap/f
         },
         onProfile: function(oEvent) {
             this.byId("profile").getContent()[0].open();
-        }
+        },
+	mailboxIcon: function(sMailboxName) {
+            if(sMailboxName === "INBOX") {
+                return "sap-icon://inbox";
+	    } else if(sMailboxName === "Drafts") {
+                return "sap-icon://notes";
+	    } else if(sMailboxName === "Outbox") {
+                return "sap-icon://outbox";
+            } else if(sMailboxName === "Sent") {
+                return "sap-icon://paper-plane";
+            } else if(sMailboxName === "Trash") {
+                return "sap-icon://delete";
+            } else if(sMailboxName === "Spam") {
+                return "sap-icon://decline";
+            }
+	}
     });
 });

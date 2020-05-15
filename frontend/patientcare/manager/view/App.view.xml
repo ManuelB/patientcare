@@ -13,7 +13,7 @@
         <tnt:sideContent>
             <tnt:SideNavigation id="sideNavigation" selectedKey="{/selectedKey}" itemSelect="onItemSelect">
                 <tnt:NavigationList items="{path: 'JMap>/Mailboxes'}">
-                    <tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages}/{JMap>totalMessages})" key="{key}">
+			<tnt:NavigationListItem text="{JMap>name} ({JMap>unreadMessages}/{JMap>totalMessages})" key="{key}" icon="{path: 'JMap>name', formatter: '.mailboxIcon'}">
                     </tnt:NavigationListItem>
                 </tnt:NavigationList>
                 <tnt:fixedItem>
