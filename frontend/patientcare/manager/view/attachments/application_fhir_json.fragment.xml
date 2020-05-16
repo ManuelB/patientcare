@@ -26,6 +26,14 @@
                     <Text text="{/id}" />
                     <Label text="Subject" />
                     <Link text="{/subject/reference}" />
+		    <Label text="Given Name" visible="{= ${/name/0/given} !== undefined}" />
+		    <Text text="{/name/0/given/0} {/name/0/given/1}" visible="{= ${/name/0/given} !== undefined}"/>
+                    <Label text="Family Name" visible="{= ${/name/0/family} !== undefined}" />
+		    <Text text="{/name/0/family}" visible="{= ${/name/0/family} !== undefined}"/>
+                    <Label text="Birthdate" visible="{= ${/birthDate} !== undefined}" />
+		    <Text text="{/birthDate}" visible="{= ${/birthDate} !== undefined}"/>
+		    <Label text="Address" visible="{= ${/address/0} !== undefined}" />
+		    <Text text="{/address/0/text}" visible="{= ${/address/0} !== undefined}"/>
                     <Label text="Value String" visible="{= ${/valueString} !== undefined}" />
                     <Text text="{/valueString}" visible="{= ${/valueString} !== undefined}"/>
                     <Label text="Value Quantity" visible="{= ${/valueQuantity} !== undefined}" />
