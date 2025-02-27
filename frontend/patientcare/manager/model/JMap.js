@@ -304,7 +304,7 @@ sap.ui.define(["./JMapListBinding", "sap/ui/model/json/JSONModel", "sap/ui/core/
         JMap.prototype.createMailAccount = function(sMail, sPassword) {
 	    let sUrl;
 	    if(window.location.hostname === "localhost") {
-                sUrl = "http://localhpst:8000"
+                sUrl = "http://localhost:8000"
 	    } else {
 	        sUrl = window.location.protocol+"//"+window.location.host;
 	    }
